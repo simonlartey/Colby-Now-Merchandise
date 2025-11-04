@@ -1,0 +1,24 @@
+# Python cache and virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env/
+venv/
+env/
+
+# macOS system files
+.DS_Store
+
+# VSCode and IDE settings
+.vscode/
+.idea/
+
+# Database and instance files
+*.db
+instance/
+
+# Byte-compiled / distribution files
+*.egg-info/
+dist/
+build/
