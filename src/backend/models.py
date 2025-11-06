@@ -1,25 +1,37 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
-# Initialize the database instance
 db = SQLAlchemy()
 
 class User(UserMixin, db.Model):
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
+    name = db.Column(db.String(150), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def set_password(self, password):
-        """Hash the password before saving."""
-        self.password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
-
-    def check_password(self, password):
-        """Verify a password against the stored hash."""
-        return check_password_hash(self.password, password)
+    items = db.relationship("Item", backref="seller", lazy=True)
 
     def __repr__(self):
-        return f'<User {self.email}>'
+        return f"<User {self.email}>"
+
+class Item(db.Model):
+    __tablename__ = "items"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    description = db.Column(db.Text)
+    category = db.Column(db.String(100))
+    size = db.Column(db.String(50))
+    seller_type = db.Column(db.String(50))
+    condition = db.Column(db.String(50))
+    price = db.Column(db.Float, nullable=False)
+    image_url = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    seller_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    def __repr__(self):
+        return f"<Item {self.title} (${self.price})>"
