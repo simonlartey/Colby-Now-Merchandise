@@ -1,0 +1,65 @@
+body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        :root {
+            --colby-blue: #002878;
+            --bs-primary: var(--colby-blue);
+            --bs-primary-rgb: 0, 40, 120;
+            --bs-link-hover-color: var(--colby-blue);
+        }
+
+        .bg-colby-blue {
+            background-color: var(--colby-blue) !important;
+        }
+
+        .text-colby-blue {
+            color: var(--colby-blue) !important;
+        }
+        
+        .btn-link.text-colby-blue:hover {
+            color: #001a4f !important; 
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--colby-blue);
+            border-color: var(--colby-blue);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--colby-blue);
+            box-shadow: 0 0 0 0.25rem rgba(0, 40, 120, 0.25);
+        }
+
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--colby-blue);
+        }
+        .navbar .nav-link.active {
+            border-bottom: 2px solid var(--colby-blue);
+        }
+        
+       
+        .card-img-top {
+            height: 12rem; 
+            object-fit: cover;
+        }
+
+
+        .card.transition-shadow {
+            transition: box-shadow 0.3s ease;
+        }
+        .card.transition-shadow:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        .card-title a.card-link {
+            color: inherit; 
+            text-decoration: none;
+        }
+        .card-title a.card-link:hover {
+            color: var(--colby-blue);
+}
