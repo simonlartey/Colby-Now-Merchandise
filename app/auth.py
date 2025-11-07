@@ -10,6 +10,7 @@ from flask import (
 from flask_mail import Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required
+from itsdangerous import URLSafeTimedSerializer
 from .models import User, db
 
 # blueprint for authenticaiton routes
@@ -85,19 +86,26 @@ def logout():
 def forgot_password():
     """Handles user password reset requests."""
     if request.method == "POST":
-        email = request.form.get("email").strip().lower()
+        email = request.form.get("email", "").strip().lower()
         user = User.query.filter_by(email=email).first()
 
         if not user:
             flash("No account found with that email address.", "danger")
             return redirect(url_for("auth.forgot_password"))
 
+        # Generate password reset token
+        s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
+        token = s.dumps(email, salt="password-reset-salt")
+
+        # Create password reset URL
+        reset_url = url_for("auth.reset_password", token=token, _external=True)
+
         # Create a password reset email
         msg = Message(
             subject="Password Reset Request - Colby Now Merchandise",
             sender=current_app.config["MAIL_USERNAME"],
             recipients=[email],
-            body=f"Hi {user.name},\n\nTo reset your password, please visit the password reset page.\n\nIf you did not request this, please ignore this email.",
+            body=f"Hi {user.name},\n\nTo reset your password, please click the following link:\n{reset_url}\n\nThis link will expire in 1 hour.\n\nIf you did not request this, please ignore this email.",
         )
 
         # Send email using current_app’s mail instance
@@ -113,6 +121,7 @@ def forgot_password():
 def reset_password(token):
     """Resets the user's password using a token sent via email."""
     try:
+        s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
         email = s.loads(token, salt="password-reset-salt", max_age=3600)
     except Exception:
         flash("The reset link is invalid or has expired.", "danger")
@@ -137,4 +146,4 @@ def reset_password(token):
         flash("Your password has been reset successfully!", "success")
         return redirect(url_for("auth.login"))
 
-    return render_template("reset_password.html")
+    return render_template("reset_password.html", token=token)

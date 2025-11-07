@@ -4,6 +4,7 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
+
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
@@ -17,6 +18,7 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return f"<User {self.email}>"
+
 
 class Item(db.Model):
     __tablename__ = "items"

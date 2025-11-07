@@ -3,34 +3,35 @@
 A full-stack web application that serves as an online marketplace for the Colby College community where students, staff, and faculty can buy, sell, and donate items.
  - This project uses a **Flask** backend to handle user authentication, product listings, and other business logic, with a standard **HTML**, **CSS**, and **JavaScript** frontend.  
 
-## Directory Structure
+## Project Structure
 
 ```
 Colby-Now-Merchandise/
 ├── README.md
-├── .env              # Environment variables (needs to be created)
-├── .env.example      # Example environment variables
-├── requirements.txt  # Project dependencies
-├── run.py            # Application entry point
+├── .env                # Environment variables (needs to be created)
+├── .env.example        # Example environment variables
+├── requirements.txt    # Project dependencies
+├── run.py              # Application entry point
 ├── instance/
-│   └── users.db      # SQLite database (auto-generated on run)
+│   └── users.db        # SQLite database (auto-generated on run)
 └── app/
-    ├── __init__.py   # Main Flask application factory
-    ├── auth.py       # Authentication routes (signup, login, etc.)
-    ├── main.py       # Core application routes (homepage, etc.)
-    ├── models.py     # SQLAlchemy database models
+    ├── __init__.py     # Main Flask application factory
+    ├── auth.py         # Authentication routes (signup, login, reset password, etc.)
+    ├── main.py         # Core application routes (homepage, posting, item details, etc.)
+    ├── models.py       # SQLAlchemy database models
     ├── static/
     │   ├── css/
-    │   │   ├── add_buy_item.css
     │   │   ├── auth.css
+    │   │   ├── buy_item.css
     │   │   └── style.css
     │   ├── images/
     │   │   ├── bg-1.jpg
     │   │   ├── colby_logo.jpg
-    │   │   ├── colbynow_logo.png
+    │   │   ├── colbynow_merch_logo.png
     │   │   └── miller_library.jpg
-    │   └── js/
-    │       └── auth.js
+    │   ├── js/
+    │   │   └── auth.js
+    │   └── uploads/    # User-uploaded item images (auto-generated)
     └── templates/
         ├── buy_item.html
         ├── forgot_password.html
@@ -38,8 +39,11 @@ Colby-Now-Merchandise/
         ├── item_details.html
         ├── login.html
         ├── post_new_item.html
+        ├── reset_password.html
         └── signup.html
 ```
+
+**Note:** The `.env` file (for environment variables) should be created in the root directory as described in the "Configure Environment Variables" section below. The `instance/` and `static/uploads/` directories are auto-generated when the application runs.
 
 ## Getting Started
 

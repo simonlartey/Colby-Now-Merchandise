@@ -26,7 +26,7 @@
 
     <nav class="navbar navbar-expand-lg bg-white shadow-sm">
         <div class="container-xl">
-            <a class="navbar-brand d-flex align-items-center" href="#">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.home') }}">
                 <img src="{{ url_for('static', filename='images/colbynow_merch_logo.png') }}" alt="ColbyNow Logo"
                     class="rounded-circle" style="height: 40px; width: 40px;">
                 <span class="fs-5 fw-bold text-dark ms-2">ColbyNow Merchandise</span>
@@ -40,13 +40,14 @@
             <div class="collapse navbar-collapse" id="main-nav">
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link text-secondary" href="#">Home</a>
+                        <a class="nav-link text-secondary" href="{{ url_for('main.home') }}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark fw-bold active" aria-current="page" href="#">Buy</a>
+                        <a class="nav-link text-dark fw-bold active" aria-current="page"
+                            href="{{ url_for('main.buy_item') }}">Buy</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-secondary" href="#">Sell or Donate</a>
+                        <a class="nav-link text-secondary" href="{{ url_for('main.post_item') }}">Sell or Donate</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-secondary" href="#">My Listings</a>
@@ -61,7 +62,8 @@
             </div>
 
             <div class="d-flex align-items-center gap-3">
-                <a href="#" class="nav-link text-secondary d-flex align-items-center gap-1">
+                <a href="{{ url_for('main.buy_item') }}"
+                    class="nav-link text-secondary d-flex align-items-center gap-1">
                     <i class="bi bi-search fs-5"></i>
                     <span>Search</span>
                 </a>
@@ -69,11 +71,25 @@
                     <i class="bi bi-cart3 fs-4"></i>
                     <span class="badge bg-light text-dark border rounded-pill">3</span>
                 </a>
-                <a href="#" class="nav-link text-secondary">Logout</a>
+                <a href="{{ url_for('auth.logout') }}" class="nav-link text-secondary">Logout</a>
             </div>
         </div>
     </nav>
 
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="container-xl mt-3">
+        <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
 
     <section class="hero">
         <div class="hero-image">
@@ -84,7 +100,7 @@
                     <h1 class="text-4xl font-bold text-white text-center mb-4">Hi {{ user.name }} !</h1>
                     <h2 class="text-2xl font-bold text-white text-center mb-4">Welcome to Colby Now Merchandise</h2>
                     <p class="mb-6 text-white text-center text-1xl border rounded-3"> A dedicated platform to buy, sell
-                        and donate items within Colby community
+                        and donate items within the Colby community
                     </p>
                 </div>
             </div>
@@ -95,15 +111,22 @@
     <section class="categories text-center py-12 bg-gray-50">
         <h2 class="text-3xl font-bold mb-10">Categories</h2>
         <p class="mb-6 text-gray-600">Shop goods by category</p>
-        <a href="{{ url_for('buy.html') }}" class="btn btn-dark mb-10 border-0 rounded-3">Shop All</a>
+        <a href="{{ url_for('main.buy_item') }}" class="btn btn-dark mb-10 border-0 rounded-3">Shop All</a>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {% for item in items %}
-            <div class="category-item bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition">
+            {% for item in category_items %}
+            <div class="category-item bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer"
+                onclick="window.location.href='{{ url_for('main.buy_item', category=item.category) }}'">
+                {% if item.image_url %}
                 <img src="{{ url_for('static', filename=item.image_url) }}" alt="{{ item.title }}"
                     class="mx-auto w-40 h-40 object-contain mb-4">
+                {% else %}
+                <div class="mx-auto w-40 h-40 bg-gray-200 flex items-center justify-center mb-4 rounded">
+                    <i class="bi bi-image text-gray-400" style="font-size: 3rem;"></i>
+                </div>
+                {% endif %}
                 <h3 class="text-lg font-semibold">{{ item.title }}</h3>
-                <p class="text-sm font-bold">${{ item.price }}</p>
+                <p class="text-sm font-bold">${{ "%.2f"|format(item.price) }}</p>
                 {% if item.category %}
                 <p class="text-gray-500 text-sm">{{ item.category }}</p>
                 {% endif %}
@@ -116,15 +139,22 @@
     <section class="featured text-center py-12">
         <h2 class="text-3xl font-bold mb-10">Recently posted items</h2>
         <p class="mb-6 text-gray-600">View the latest priced and free items</p>
-        <a href="{{ url_for('buy.html') }}" class="btn btn-dark mb-10 border-0 rounded-3">Shop All</a>
+        <a href="{{ url_for('main.buy_item') }}" class="btn btn-dark mb-10 border-0 rounded-3">Shop All</a>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {% for item in recent_items %}
-            <div class="item-card bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition">
-                <img src="{{ url_for('static', filename=item.image_url) }}" alt="{{ item.image_url }}"
+            <div class="item-card bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer"
+                onclick="window.location.href='{{ url_for('main.buy_item') }}'">
+                {% if item.image_url %}
+                <img src="{{ url_for('static', filename=item.image_url) }}" alt="{{ item.title }}"
                     class="mx-auto w-40 h-40 object-contain mb-4">
+                {% else %}
+                <div class="mx-auto w-40 h-40 bg-gray-200 flex items-center justify-center mb-4 rounded">
+                    <i class="bi bi-image text-gray-400" style="font-size: 3rem;"></i>
+                </div>
+                {% endif %}
                 <h3 class="text-lg font-semibold">{{ item.title }}</h3>
-                <p class="text-sm font-bold">${{ item.price }}</p>
+                <p class="text-sm font-bold">${{ "%.2f"|format(item.price) }}</p>
             </div>
             {% endfor %}
         </div>
@@ -146,10 +176,12 @@
 
                 <div class="col-md-6 col-lg-auto">
                     <nav class="d-flex flex-wrap justify-content-center justify-content-md-end gap-3 gap-lg-4">
-                        <a href="#" class="text-secondary text-decoration-none fw-medium">Home</a>
+                        <a href="{{ url_for('main.home') }}"
+                            class="text-secondary text-decoration-none fw-medium">Home</a>
                         <a href="#" class="text-secondary text-decoration-none fw-medium">About</a>
-                        <a href="#" class="text-secondary text-decoration-none fw-medium">Browse Items</a>
-                        <a href="#" class="text-secondary text-decoration-none fw-medium">Post an Item</a>
+                        <a href="{{ url_for('main.buy_item') }}"
+                            class="text-secondary text-decoration-none fw-medium">Browse Items</a>
+                        <a href="" class="text-secondary text-decoration-none fw-medium">Post an Item</a>
                         <a href="#" class="text-secondary text-decoration-none fw-medium">FAQs</a>
                         <a href="#" class="text-secondary text-decoration-none fw-medium">Contact Us</a>
                     </nav>

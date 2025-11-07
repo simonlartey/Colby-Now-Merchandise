@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buy an Item - ColbyNow Merchandise</title>
-    
+
     <!-- Load Google Font 'Inter' -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    
+
     <!-- Load Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
     <!-- Load Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="/src/frontend/static/css/add_buy_item.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buy_item.css') }}">
 
 </head>
+
 <body class="bg-light">
 
     <!-- Header / Navigation Bar -->
@@ -32,11 +35,13 @@
         <!-- Main Navigation -->
         <nav class="navbar navbar-expand-sm navbar-light bg-white">
             <div class="container">
-                 <img src="/src/frontend/static/images/Screenshot 2025-11-05 at 6.01.34 PM.png" alt="ColbyNow Logo" class="rounded-circle" style="height: 2.5rem; width: 2.5rem;">
-                <a class="navbar-brand" href="#">ColbyNow Merchandise</a>
+                <img src="{{ url_for('static', filename='images/colbynow_merch_logo.png') }}" alt="ColbyNow Logo"
+                    class="rounded-circle" style="height: 2.5rem; width: 2.5rem;">
+                <a class="navbar-brand" href="{{ url_for('main.home') }}">ColbyNow Merchandise</a>
 
                 <!-- Mobile Menu Button -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                    aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -44,13 +49,13 @@
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav mx-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Home</a>
+                            <a class="nav-link" href="{{ url_for('main.home') }}">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="#">Buy</a>
+                            <a class="nav-link active" aria-current="page" href="{{ url_for('main.buy_item') }}">Buy</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Sell or Donate</a>
+                            <a class="nav-link" href="{{ url_for('main.post_item') }}">Sell or Donate</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#">My Listings</a>
@@ -62,28 +67,36 @@
                             <a class="nav-link" href="#">Contact</a>
                         </li>
                     </ul>
-                    
+
                     <!-- Search, Cart, Logout (Desktop) -->
                     <div class="d-flex align-items-center">
                         <!-- Search Bar -->
-                        <div class="input-group me-2">
-                            <span class="input-group-text bg-white" id="basic-addon1">
-                                <i class="bi bi-search"></i>
-                            </span>
-                            <input type="text" class="form-control" placeholder="Search" aria-label="Search">
-                        </div>
+                        <form method="GET" action="{{ url_for('main.buy_item') }}" class="d-flex me-2">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white" id="basic-addon1">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" name="search" class="form-control" placeholder="Search"
+                                    aria-label="Search" value="{{ current_search or '' }}">
+                                <input type="hidden" name="category" value="{{ current_category or '' }}">
+                                <input type="hidden" name="seller_type" value="{{ current_seller_type or '' }}">
+                                <input type="hidden" name="condition" value="{{ current_condition or '' }}">
+                                <input type="hidden" name="sort_by" value="{{ current_sort or 'newest' }}">
+                            </div>
+                        </form>
 
                         <!-- Cart Icon -->
                         <a href="#" class="nav-link position-relative me-2">
                             <i class="bi bi-cart fs-5"></i>
-                            <!-- Cart item count -->
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6em;">
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                style="font-size: 0.6em;">
                                 3
                             </span>
                         </a>
 
                         <!-- Logout Link -->
-                        <a href="#" class="nav-link">Logout</a>
+                        <a href="{{ url_for('auth.logout') }}" class="nav-link">Logout</a>
                     </div>
                 </div>
             </div>
@@ -92,99 +105,155 @@
 
     <!-- Main Content Area -->
     <main class="container my-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
         <h1 class="display-5 fw-bold">Buy an Item</h1>
         <p class="text-muted fs-5">Buy an item or sift through countless free items.</p>
 
         <div class="row mt-4">
-            
+
             <!-- Filters Sidebar -->
             <aside class="col-lg-3 mb-4 mb-lg-0">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0">Filters</h5>
-                    <button class="btn btn-link btn-sm p-0 text-colby-blue text-decoration-none">Clear Filters</button>
-                </div>
-                
-                <!-- Categories Filter -->
-                <div class="mb-4">
-                    <h6 class="fw-medium mb-2">Categories</h6>
-                    <div class="form-check">
-                        <input class="form-check-input category-checkbox" type="checkbox" value="" id="cat-books">
-                        <label class="form-check-label" for="cat-books">Books</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input category-checkbox" type="checkbox" value="" id="cat-electronics">
-                        <label class="form-check-label" for="cat-electronics">Electronics</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input category-checkbox" type="checkbox" value="" id="cat-furniture">
-                        <label class="form-check-label" for="cat-furniture">Furniture</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input category-checkbox" type="checkbox" value="" id="cat-clothing">
-                        <label class="form-check-label" for="cat-clothing">Clothing</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input category-checkbox" type="checkbox" value="" id="cat-misc">
-                        <label class="form-check-label" for="cat-misc">Miscellaneous</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input category-checkbox" type="checkbox" value="" id="cat-cat">
-                        <label class="form-check-label" for="cat-cat">Cat-related</label>
-                    </div>
-                </div>
+                <form method="GET" action="{{ url_for('main.buy_item') }}" id="filter-form">
+                    <input type="hidden" name="search" value="{{ current_search or '' }}">
+                    <input type="hidden" name="sort_by" value="{{ current_sort or 'newest' }}">
 
-                <!-- Seller Type Filter -->
-                <div class="mb-4">
-                    <h6 class="fw-medium mb-2">Seller type</h6>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="seller-student">
-                        <label class="form-check-label" for="seller-student">Student</label>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Filters</h5>
+                        <a href="{{ url_for('main.buy_item') }}"
+                            class="btn btn-link btn-sm p-0 text-colby-blue text-decoration-none">Clear Filters</a>
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="seller-staff">
-                        <label class="form-check-label" for="seller-staff">Staff</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="seller-faculty">
-                        <label class="form-check-label" for="seller-faculty">Faculty</label>
-                    </div>
-                </div>
 
-                <!-- Conditions Filter -->
-                <div>
-                    <h6 class="fw-medium mb-2">Conditions</h6>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="cond-new">
-                        <label class="form-check-label" for="cond-new">Brand new</label>
+                    <!-- Categories Filter -->
+                    <div class="mb-4">
+                        <h6 class="fw-medium mb-2">Categories</h6>
+                        {% for cat in categories %}
+                        <div class="form-check">
+                            <input class="form-check-input category-checkbox" type="checkbox" name="category"
+                                value="{{ cat }}" id="cat-{{ cat|lower|replace(' ', '-') }}" {% if current_category==cat
+                                %}checked{% endif %} onchange="this.form.submit()">
+                            <label class="form-check-label" for="cat-{{ cat|lower|replace(' ', '-') }}">{{ cat
+                                }}</label>
+                        </div>
+                        {% endfor %}
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="cond-like-new">
-                        <label class="form-check-label" for="cond-like-new">Like new</label>
+
+                    <!-- Seller Type Filter -->
+                    <div class="mb-4">
+                        <h6 class="fw-medium mb-2">Seller type</h6>
+                        {% for st in seller_types %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="seller_type" value="{{ st }}"
+                                id="seller-{{ st|lower }}" {% if current_seller_type==st %}checked{% endif %}
+                                onchange="this.form.submit()">
+                            <label class="form-check-label" for="seller-{{ st|lower }}">{{ st }}</label>
+                        </div>
+                        {% endfor %}
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="cond-fair">
-                        <label class="form-check-label" for="cond-fair">Fair</label>
+
+                    <!-- Conditions Filter -->
+                    <div>
+                        <h6 class="fw-medium mb-2">Conditions</h6>
+                        {% for cond in conditions %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="condition" value="{{ cond }}"
+                                id="cond-{{ cond|lower|replace(' ', '-') }}" {% if current_condition==cond %}checked{%
+                                endif %} onchange="this.form.submit()">
+                            <label class="form-check-label" for="cond-{{ cond|lower|replace(' ', '-') }}">{{ cond
+                                }}</label>
+                        </div>
+                        {% endfor %}
                     </div>
-                </div>
+                </form>
             </aside>
 
             <!-- Item Grid -->
             <div class="col-lg-9">
                 <!-- Sort By Dropdown -->
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-muted small d-none" id="product-count-display">Showing 6 Products</span>
+                    <span class="text-muted small" id="product-count-display">Showing {{ item_count }} Product{% if
+                        item_count != 1 %}s{% endif %}</span>
                     <div class="d-flex align-items-center ms-auto">
-                        <label for="sort-by" class="form-label mb-0 me-2 small">Sort By</label>
-                        <select id="sort-by" name="sort-by" class="form-select form-select-sm" style="width: auto;">
-                            <option>Popular</option>
-                            <option>Newest</option>
-                            <option>Price: Low to High</option>
-                            <option>Price: High to Low</option>
-                        </select>
+                        <form method="GET" action="{{ url_for('main.buy_item') }}" class="d-flex align-items-center">
+                            <input type="hidden" name="search" value="{{ current_search or '' }}">
+                            <input type="hidden" name="category" value="{{ current_category or '' }}">
+                            <input type="hidden" name="seller_type" value="{{ current_seller_type or '' }}">
+                            <input type="hidden" name="condition" value="{{ current_condition or '' }}">
+                            <label for="sort-by" class="form-label mb-0 me-2 small">Sort By</label>
+                            <select id="sort-by" name="sort_by" class="form-select form-select-sm" style="width: auto;"
+                                onchange="this.form.submit()">
+                                <option value="newest" {% if current_sort=='newest' %}selected{% endif %}>Newest
+                                </option>
+                                <option value="oldest" {% if current_sort=='oldest' %}selected{% endif %}>Oldest
+                                </option>
+                                <option value="price_low" {% if current_sort=='price_low' %}selected{% endif %}>Price:
+                                    Low to High</option>
+                                <option value="price_high" {% if current_sort=='price_high' %}selected{% endif %}>Price:
+                                    High to Low</option>
+                            </select>
+                        </form>
                     </div>
                 </div>
 
-                <!-- Load More Button -->
+                <!-- Items Grid -->
+                {% if items %}
+                <div class="row g-4">
+                    {% for item in items %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm">
+                            {% if item.image_url %}
+                            <img src="{{ url_for('static', filename=item.image_url) }}" class="card-img-top"
+                                alt="{{ item.title }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                                style="height: 200px;">
+                                <i class="bi bi-image fs-1 text-muted"></i>
+                            </div>
+                            {% endif %}
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ item.title }}</h5>
+                                {% if item.description %}
+                                <p class="card-text text-muted small flex-grow-1">{{ item.description[:100] }}{% if
+                                    item.description|length > 100 %}...{% endif %}</p>
+                                {% endif %}
+                                <div class="mt-auto">
+                                    <p class="card-text">
+                                        <strong class="text-primary fs-4">${{ "%.2f"|format(item.price) }}</strong>
+                                    </p>
+                                    {% if item.category %}
+                                    <span class="badge bg-secondary mb-2">{{ item.category }}</span>
+                                    {% endif %}
+                                    {% if item.condition %}
+                                    <span class="badge bg-info mb-2">{{ item.condition }}</span>
+                                    {% endif %}
+                                    <div class="d-grid gap-2 mt-3">
+                                        <a href="{{ url_for('main.item_details', item_id=item.id) }}"
+                                            class="btn btn-primary">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-3">No items found. Try adjusting your filters.</p>
+                    <a href="{{ url_for('main.buy_item') }}" class="btn btn-outline-primary">Clear All Filters</a>
+                </div>
+                {% endif %}
+
+                <!-- Load More Button (if needed for pagination later) -->
                 <div class="mt-5 text-center d-none" id="load-more-container">
                     <button type="button" class="btn btn-outline-secondary">
                         Load more products
@@ -204,6 +273,9 @@
     </footer>
 
     <!-- Load Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
 </body>
+
 </html>
