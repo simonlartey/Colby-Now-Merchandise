@@ -1,10 +1,11 @@
-from flask import Flask
+from flask import Flask, redirect, url_for, flash
 from flask_login import LoginManager
 from flask_mail import Mail
 from .models import db, User
 from .auth import auth
 from .main import main
 import os
+from werkzeug.exceptions import RequestEntityTooLarge
 
 
 # Create a Mail instance globally
@@ -12,16 +13,13 @@ mail = Mail()
 
 
 def create_app():
-    app = Flask(
-        __name__,
-        template_folder="templates",
-        static_folder="static"
-    )
+    app = Flask(__name__, template_folder="templates", static_folder="static")
 
     # Basic app configuration
     app.secret_key = os.getenv("SECRET_KEY", "dev_secret_key")
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB max uploaded file size
 
     # Mail configuration
     app.config["MAIL_SERVER"] = "smtp.gmail.com"
@@ -50,6 +48,15 @@ def create_app():
     # Create tables if missing
     with app.app_context():
         db.create_all()
+
+    # Error handler for file size limit
+    @app.errorhandler(RequestEntityTooLarge)
+    def handle_file_too_large(e):
+        flash(
+            "File too large. Maximum file size is 16MB. Please choose a smaller file.",
+            "danger",
+        )
+        return redirect(url_for("main.post_item")), 413
 
     return app
 
