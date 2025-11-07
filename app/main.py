@@ -212,3 +212,13 @@ def post_item():
 
     # GET request - show the form
     return render_template("post_new_item.html")
+
+
+@main.route("/item/<int:item_id>")
+@login_required
+def item_details(item_id):
+    """
+    Displays detailed information about a specific item.
+    """
+    item = Item.query.get_or_404(item_id)
+    return render_template("item_details.html", item=item)
