@@ -118,7 +118,7 @@
 
                     <div class="d-grid gap-3 mt-auto pt-4">
                         <button class="btn btn-primary btn-lg">Add to Cart</button>
-                        <button class="btn btn-outline-primary">Contact Seller</button>
+                        <a href="{{ url_for('main.seller_details', seller_id=item.seller_id) }}" class="btn btn-outline-primary">Contact Seller</a>
                     </div>
                 </div>
             </div>

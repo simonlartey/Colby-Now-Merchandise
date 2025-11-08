@@ -24,54 +24,37 @@
         </div>
     </div>
 
-    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+    <nav class="bg-white shadow-sm">
         <div class="container-xl">
-            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.home') }}">
-                <img src="{{ url_for('static', filename='images/colbynow_merch_logo.png') }}" alt="ColbyNow Logo"
-                    class="rounded-circle" style="height: 40px; width: 40px;">
-                <span class="fs-5 fw-bold text-dark ms-2">ColbyNow Merchandise</span>
-            </a>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav"
-                aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="main-nav">
-                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link text-secondary" href="{{ url_for('main.home') }}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark fw-bold active" aria-current="page"
-                            href="{{ url_for('main.buy_item') }}">Buy</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-secondary" href="{{ url_for('main.post_item') }}">Sell or Donate</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-secondary" href="#">My Listings</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-secondary" href="#">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-secondary" href="#">Contact</a>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="d-flex align-items-center gap-3">
-                <a href="{{ url_for('main.buy_item') }}"
-                    class="nav-link text-secondary d-flex align-items-center gap-1">
-                    <i class="bi bi-search fs-5"></i>
-                    <span>Search</span>
-                </a>
-                <a href="#" class="nav-link text-secondary d-flex align-items-center gap-1">
-                    <i class="bi bi-cart3 fs-4"></i>
-                    <span class="badge bg-light text-dark border rounded-pill">3</span>
-                </a>
-                <a href="{{ url_for('auth.logout') }}" class="nav-link text-secondary">Logout</a>
+            <div class="d-flex justify-content-between align-items-center" style="height: 5rem;">
+    
+                <div class="d-flex align-items-center gap-3">
+                    <img src="{{ url_for('static', filename='images/colbynow_merch_logo.png') }}" alt="ColbyNow Logo"
+                        class="rounded-circle" style="height: 2.5rem; width: 2.5rem;">
+                    <span class="fs-5 fw-bold text-dark">ColbyNow Merchandise</span>
+                </div>
+    
+                <div class="d-none d-md-flex align-items-center gap-4">
+                    <a href="{{ url_for('main.home') }}" class="text-dark text-decoration-none fw-medium">Home</a>
+                    <a href="{{ url_for('main.buy_item') }}" class="text-secondary text-decoration-none fw-medium">Buy</a>
+                    <a href="{{ url_for('main.post_item') }}" class="text-secondary text-decoration-none fw-medium">Sell or Donate</a>
+                    <a href="#" class="text-secondary text-decoration-none fw-medium">My Listings</a>
+                    <a href="#" class="text-secondary text-decoration-none fw-medium">About</a>
+                    <a href="#" class="text-secondary text-decoration-none fw-medium">Contact</a>
+                </div>
+    
+                <div class="d-flex align-items-center gap-4">
+                    <a href="{{ url_for('main.buy_item') }}"
+                        class="text-secondary text-decoration-none d-flex align-items-center gap-1">
+                        <i class="bi bi-search fs-5"></i>
+                        <span class="d-none d-sm-inline">Search</span>
+                    </a>
+                    <a href="#" class="text-secondary text-decoration-none d-flex align-items-center gap-1">
+                        <i class="bi bi-cart3 fs-4"></i>
+                        <span class="badge bg-light text-dark border rounded-pill">3</span>
+                    </a>
+                    <a href="{{ url_for('auth.logout') }}" class="text-secondary text-decoration-none text-sm fw-medium">Logout</a>
+                </div>
             </div>
         </div>
     </nav>

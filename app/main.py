@@ -9,7 +9,7 @@ from flask import (
 )
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from .models import Item, db
+from .models import Item, db, User
 import os
 from datetime import datetime
 
@@ -222,3 +222,13 @@ def item_details(item_id):
     """
     item = Item.query.get_or_404(item_id)
     return render_template("item_details.html", item=item)
+
+
+@main.route("/seller/<int:seller_id>")
+@login_required
+def seller_details(seller_id):
+    """
+    Displays detailed information about a specific seller.
+    """
+    seller = User.query.get_or_404(seller_id)
+    return render_template("sellers_details.html", seller=seller)
