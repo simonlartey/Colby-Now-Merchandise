@@ -26,6 +26,11 @@ def signup():
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "").strip()
         confirm_password = request.form.get("confirm_password", "").strip()
+        
+        # Restrict signup to Colby College emails only
+        if not email.endswith("@colby.edu"):
+            flash("Please use your Colby College email address.", "danger")
+            return redirect(url_for("auth.signup"))
 
         # Check if user already exists
         existing_user = User.query.filter_by(email=email).first()
