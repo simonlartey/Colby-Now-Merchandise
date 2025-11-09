@@ -29,58 +29,7 @@
 
 <body class="text-dark">
 
-    <header class="text-white" style="background-color: #002878;">
-        <div class="container-xl d-flex justify-content-end align-items-center" style="height: 2.5rem;">
-            <a href="#" class="text-sm text-white text-decoration-none opacity-75 opacity-100-hover">Support</a>
-        </div>
-    </header>
-
-    <nav class="bg-white shadow-sm">
-        <div class="container-xl">
-            <div class="d-flex justify-content-between align-items-center" style="height: 5rem;">
-
-                <div class="d-flex align-items-center gap-3">
-                    <img src="{{ url_for('static', filename='images/colbynow_merch_logo.png') }}" alt="ColbyNow Logo"
-                        class="rounded-circle" style="height: 2.5rem; width: 2.5rem;">
-                    <span class="fs-5 fw-bold text-dark">ColbyNow Merchandise</span>
-                </div>
-
-                <div class="d-none d-md-flex align-items-center gap-4">
-                    <a href="{{ url_for('main.home') }}" class="text-secondary text-decoration-none fw-medium">Home</a>
-                    <a href="{{ url_for('main.buy_item') }}"
-                        class="text-secondary text-decoration-none fw-medium">Buy</a>
-                    <a href="{{ url_for('main.post_item')}}" class="text-dark text-decoration-none fw-medium">Sell or
-                        Donate</a>
-                    <a href="#" class="text-secondary text-decoration-none fw-medium">My Listings</a>
-                    <a href="#" class="text-secondary text-decoration-none fw-medium">About</a>
-                    <a href="#" class="text-secondary text-decoration-none fw-medium">Contact</a>
-                </div>
-
-                <div class="d-flex align-items-center gap-4">
-                    <a href="{{ url_for('main.buy_item') }}"
-                        class="text-secondary text-decoration-none d-flex align-items-center gap-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg" style="width: 1.25rem; height: 1.25rem;">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        <span class="text-sm fw-medium">Search</span>
-                    </a>
-                    <a href="#" class="text-secondary text-decoration-none d-flex align-items-center gap-1">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg" style="width: 1.5rem; height: 1.5rem;">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
-                            </path>
-                        </svg>
-                        <span class="text-sm fw-bold">3</span>
-                    </a>
-                    <a href="{{ url_for('auth.logout') }}"
-                        class="text-secondary text-decoration-none text-sm fw-medium">Logout</a>
-                </div>
-            </div>
-        </div>
-    </nav>
+    {% include "_navbar.html" %}
 
     <main class="container-lg my-5">
         <h1 class="display-5 fw-bold text-dark mb-4">Post a New Listing</h1>

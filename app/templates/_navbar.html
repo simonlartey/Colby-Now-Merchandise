@@ -1,0 +1,69 @@
+<nav class="bg-white shadow-sm">
+  <div class="container-xl">
+    <div class="d-flex justify-content-between align-items-center" style="height: 5rem;">
+
+      <!-- Brand -->
+      <div class="d-flex align-items-center gap-3">
+        <img src="{{ url_for('static', filename='images/colbynow_merch_logo.png') }}" 
+             alt="ColbyNow Logo"
+             class="rounded-circle" style="height: 2.5rem; width: 2.5rem;">
+        <span class="fs-5 fw-bold text-dark">ColbyNow Merchandise</span>
+      </div>
+
+      <!-- Navigation Links -->
+      <div class="d-none d-md-flex align-items-center gap-4">
+        <a href="{{ url_for('main.home') }}"
+           class="text-decoration-none fw-medium {% if request.endpoint == 'main.home' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+           Home
+        </a>
+
+        <a href="{{ url_for('main.buy_item') }}"
+           class="text-decoration-none fw-medium {% if request.endpoint == 'main.buy_item' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+           Buy
+        </a>
+
+        <a href="{{ url_for('main.post_item') }}"
+           class="text-decoration-none fw-medium {% if request.endpoint == 'main.post_item' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+           Sell or Donate
+        </a>
+
+        <a href="{{ url_for('main.my_listings') }}"
+           class="text-decoration-none fw-medium {% if request.endpoint == 'main.my_listings' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+           My Listings
+        </a>
+
+        <a href="#" class="text-secondary text-decoration-none fw-medium">About</a>
+        <a href="#" class="text-secondary text-decoration-none fw-medium">Contact</a>
+      </div>
+
+      <!-- Right Section -->
+      <div class="d-flex align-items-center gap-4">
+
+        <!-- Search Form -->
+        <form method="GET" action="{{ request.path }}" class="d-flex align-items-center position-relative">
+          <input 
+            type="text" 
+            name="search" 
+            class="form-control search-input ps-5" 
+            placeholder="Search items..." 
+            value="{{ request.args.get('search', '') }}"
+          >
+          <i class="bi bi-search search-icon"></i>
+        </form>
+
+
+        <!-- Cart Icon -->
+        <a href="#" class="text-secondary text-decoration-none position-relative">
+          <i class="bi bi-cart3 fs-4"></i>
+          <span class="badge bg-light text-dark border rounded-pill position-absolute top-0 start-100 translate-middle">
+            3
+          </span>
+        </a>
+
+        <!-- Logout -->
+        <a href="{{ url_for('auth.logout') }}" 
+           class="text-secondary text-decoration-none text-sm fw-medium">Logout</a>
+      </div>
+    </div>
+  </div>
+</nav>
