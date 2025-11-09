@@ -37,3 +37,18 @@ class Item(db.Model):
 
     def __repr__(self):
         return f"<Item {self.title} (${self.price})>"
+
+
+
+    @classmethod
+    def search(cls, term):
+        """
+        Returns a SQLAlchemy query filtered by a search term (title or description).
+        If no term is provided, returns the base Item.query.
+        """
+        if not term:
+            return cls.query
+        term = term.strip()
+        return cls.query.filter(
+            cls.title.ilike(f"%{term}%") | cls.description.ilike(f"%{term}%")
+        )
