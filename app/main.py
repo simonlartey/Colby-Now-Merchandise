@@ -22,22 +22,36 @@ main = Blueprint("main", __name__)
 def home():
     """
     Displays the homepage after a successful login or signup.
-    Requires user to be authenticated.
+    Supports searching for items by keyword.
     """
+    search = request.args.get("search", "").strip()
+
+    if search:
+        # User performed a search — show filtered results
+        results = Item.search(search).order_by(Item.created_at.desc()).limit(12).all()
+        return render_template(
+            "home.html",
+            user=current_user,
+            category_items=[],     # Skip category display during search
+            recent_items=results,  # Reuse this section to show results
+            current_search=search,
+        )
+
+    # Default homepage (no search)
     categories = ["electronics", "clothing", "furniture"]
     category_items = [
         Item.query.filter_by(category=category).order_by(Item.created_at.desc()).first()
         for category in categories
     ]
-    category_items = [
-        category_item for category_item in category_items if category_item is not None
-    ]
+    category_items = [item for item in category_items if item]
     recent_items = Item.query.order_by(Item.created_at.desc()).limit(6).all()
+
     return render_template(
         "home.html",
         user=current_user,
         category_items=category_items,
         recent_items=recent_items,
+        current_search=None,
     )
 
 
@@ -47,33 +61,21 @@ def buy_item():
     """
     Displays all items available for purchase with filtering and sorting.
     """
-    # Get query parameters
     category = request.args.get("category", type=str)
     seller_type = request.args.get("seller_type", type=str)
     condition = request.args.get("condition", type=str)
     search = request.args.get("search", type=str)
     sort_by = request.args.get("sort_by", default="newest", type=str)
 
-    # Start with base query
-    query = Item.query
+    query = Item.search(search)
 
-    # Apply filters
     if category:
         query = query.filter_by(category=category)
-
     if seller_type:
         query = query.filter_by(seller_type=seller_type)
-
     if condition:
         query = query.filter_by(condition=condition)
 
-    # Apply search
-    if search:
-        query = query.filter(
-            Item.title.ilike(f"%{search}%") | Item.description.ilike(f"%{search}%")
-        )
-
-    # Apply sorting
     if sort_by == "newest":
         query = query.order_by(Item.created_at.desc())
     elif sort_by == "oldest":
@@ -85,10 +87,8 @@ def buy_item():
     else:
         query = query.order_by(Item.created_at.desc())
 
-    # Get all items
     items = query.all()
 
-    # Get unique values for filter options
     all_categories = db.session.query(Item.category).distinct().all()
     categories = [cat[0] for cat in all_categories if cat[0]]
 
@@ -121,7 +121,6 @@ def post_item():
     """
     if request.method == "POST":
         try:
-            # Get form data
             title = request.form.get("title", "").strip()
             description = request.form.get("description", "").strip()
             category = request.form.get("category", "").strip()
@@ -130,35 +129,24 @@ def post_item():
             condition = request.form.get("condition", "").strip()
             price_str = request.form.get("price", "").strip()
 
-            # Handle file upload
             image_url = None
             if "image" in request.files:
                 file = request.files["image"]
                 if file and file.filename:
-                    # Validate file type
                     allowed_extensions = {"png", "jpg", "jpeg", "gif", "webp"}
                     filename = secure_filename(file.filename)
-
-                    # Check if file extension is allowed
                     if (
                         "." in filename
                         and filename.rsplit(".", 1)[1].lower() in allowed_extensions
                     ):
-                        # Create unique filename to avoid conflicts
                         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                         filename = f"{timestamp}_{filename}"
-
-                        # Create uploads directory if it doesn't exist
                         upload_folder = os.path.join(
                             current_app.static_folder, "uploads"
                         )
                         os.makedirs(upload_folder, exist_ok=True)
-
-                        # Save file
                         filepath = os.path.join(upload_folder, filename)
                         file.save(filepath)
-
-                        # Store relative path for database
                         image_url = f"uploads/{filename}"
                     else:
                         flash(
@@ -167,7 +155,6 @@ def post_item():
                         )
                         return redirect(url_for("main.post_item"))
 
-            # Basic validation
             if not title:
                 flash("Item name is required.", "danger")
                 return redirect(url_for("main.post_item"))
@@ -176,7 +163,6 @@ def post_item():
                 flash("Price is required.", "danger")
                 return redirect(url_for("main.post_item"))
 
-            # Validate and convert price
             try:
                 price_clean = price_str.replace("$", "").replace(",", "").strip()
                 price = float(price_clean)
@@ -186,7 +172,6 @@ def post_item():
                 flash("Invalid price. Please enter a valid number.", "danger")
                 return redirect(url_for("main.post_item"))
 
-            # Create new item
             new_item = Item(
                 title=title,
                 description=description if description else None,
@@ -210,7 +195,6 @@ def post_item():
             flash(f"Error posting item: {str(e)}", "danger")
             return redirect(url_for("main.post_item"))
 
-    # GET request - show the form
     return render_template("post_new_item.html")
 
 
@@ -232,3 +216,85 @@ def seller_details(seller_id):
     """
     seller = User.query.get_or_404(seller_id)
     return render_template("sellers_details.html", seller=seller)
+
+
+@main.route('/my_listings')
+@login_required
+def my_listings():
+    """Display all items posted by the logged-in user."""
+    search = request.args.get("search", "")
+    query = Item.search(search).filter_by(seller_id=current_user.id)
+    items = query.all()
+
+    if not items:
+        flash("You haven’t posted any listings yet.", "info")
+
+    return render_template('my_listings.html', items=items, user=current_user, current_search=search)
+
+
+@main.route('/edit_item/<int:item_id>', methods=['GET', 'POST'])
+@login_required
+def edit_item(item_id):
+    item = Item.query.get_or_404(item_id)
+
+    if item.seller_id != current_user.id:
+        flash("Unauthorized action.", "danger")
+        return redirect(url_for('main.my_listings'))
+
+    if request.method == 'POST':
+        try:
+            item.title = request.form.get('title', item.title).strip()
+            item.description = request.form.get('description', item.description).strip()
+            item.category = request.form.get('category', item.category).strip()
+            item.size = request.form.get('size', item.size).strip()
+            item.seller_type = request.form.get('seller_type', item.seller_type).strip()
+            item.condition = request.form.get('condition', item.condition).strip()
+
+            price_str = request.form.get('price', str(item.price))
+            try:
+                price_clean = price_str.replace("$", "").replace(",", "").strip()
+                item.price = float(price_clean)
+            except ValueError:
+                flash("Invalid price. Please enter a valid number.", "danger")
+                return redirect(url_for('main.edit_item', item_id=item.id))
+
+            if "image" in request.files:
+                file = request.files["image"]
+                if file and file.filename:
+                    allowed_extensions = {"png", "jpg", "jpeg", "gif", "webp"}
+                    filename = secure_filename(file.filename)
+                    if (
+                        "." in filename
+                        and filename.rsplit(".", 1)[1].lower() in allowed_extensions
+                    ):
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        filename = f"{timestamp}_{filename}"
+                        upload_folder = os.path.join(current_app.static_folder, "uploads")
+                        os.makedirs(upload_folder, exist_ok=True)
+                        filepath = os.path.join(upload_folder, filename)
+                        file.save(filepath)
+                        item.image_url = f"uploads/{filename}"
+
+            db.session.commit()
+            flash("Listing updated successfully!", "success")
+            return redirect(url_for('main.my_listings'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error updating item: {str(e)}", "danger")
+            return redirect(url_for('main.edit_item', item_id=item.id))
+
+    return render_template('edit_item.html', item=item)
+
+
+@main.route('/delete_item/<int:item_id>', methods=['POST'])
+@login_required
+def delete_item(item_id):
+    item = Item.query.get_or_404(item_id)
+    if item.seller_id != current_user.id:
+        flash("Unauthorized action.", "danger")
+        return redirect(url_for('main.my_listings'))
+    db.session.delete(item)
+    db.session.commit()
+    flash("Item deleted successfully.", "success")
+    return redirect(url_for('main.my_listings'))
