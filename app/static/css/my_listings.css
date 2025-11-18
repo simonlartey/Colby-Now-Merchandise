@@ -1,0 +1,192 @@
+/* ===============================
+   GLOBAL
+================================== */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #212529;
+  background-color: #f8f9fa;
+}
+
+/* ===============================
+   HERO SECTION
+================================== */
+.listing-hero {
+  background: linear-gradient(135deg, #003366, #0055A4);
+  color: white;
+  padding: 3.5rem 1rem;
+  border-radius: 1rem;
+  text-align: center;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.listing-hero h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.listing-hero p {
+  opacity: 0.95;
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ===============================
+   CARD STYLES
+================================== */
+
+.listing-card {
+  border: none;
+  border-radius: 1rem;
+  overflow: hidden;
+  background-color: #ffffff;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  cursor: pointer;
+  position: relative;
+  opacity: 0;
+  animation: fadeInUp 0.6s ease forwards;
+  animation-fill-mode: forwards; 
+  will-change: transform, opacity;
+}
+
+/* Full card hover effect */
+.listing-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  opacity: 1;
+  z-index: 5;
+}
+
+/* Image hover enhancement */
+.listing-card img {
+  height: 220px;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 1rem 1rem 0 0;
+  transition: transform 0.4s ease, opacity 0.3s ease;
+}
+
+.listing-card:hover img {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+
+/* ===============================
+   TEXT & PRICE
+================================== */
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.card-text {
+  color: #6c757d;
+}
+
+.price-tag {
+  color: #003a8c;
+  font-weight: 700;
+  font-size: 1.15rem;
+  margin-top: 0.75rem;
+}
+
+/* ===============================
+   BUTTONS
+================================== */
+.btn-action {
+  border-radius: 30px;
+  transition: all 0.25s ease;
+}
+
+.btn-action:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.btn-outline-primary {
+  border: 1.5px solid #003a8c;
+  color: #003a8c;
+}
+
+.btn-outline-primary:hover {
+  background-color: #003a8c;
+  color: #fff;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  border: none;
+  color: #000;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border: none;
+}
+
+/* ===============================
+   EMPTY STATE
+================================== */
+.empty-state {
+  margin-top: 5rem;
+  text-align: center;
+}
+
+.empty-state i {
+  font-size: 4rem;
+  color: #adb5bd;
+}
+
+.empty-state h4 {
+  margin-top: 1rem;
+  color: #495057;
+  font-weight: 600;
+}
+
+.empty-state p {
+  color: #6c757d;
+}
+
+/* ===============================
+   ANIMATIONS
+================================== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none; /* ✅ Prevents transform lock after animation */
+  }
+}
+
+/* ===============================
+   RESPONSIVE ADJUSTMENTS
+================================== */
+@media (max-width: 768px) {
+  .listing-hero {
+    padding: 2.5rem 1rem;
+  }
+
+  .listing-hero h1 {
+    font-size: 1.8rem;
+  }
+
+  .listing-hero p {
+    font-size: 1rem;
+  }
+
+  .listing-card img {
+    height: 180px;
+  }
+
+  .btn-action {
+    font-size: 0.9rem;
+  }
+}
