@@ -1,0 +1,37 @@
+body {
+            background-color: #f8f9fa; 
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+        }
+        .main-header {
+            background-color: #002878; 
+            color: white;
+            height: 40px;
+        }
+        .contact-section {
+            background-color: #f8f9fa;
+        }
+        .contact-info-box {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+        }
+        .contact-form-card {
+            background-color: white;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+        }
+        .colby-blue-btn {
+            background-color: #3b4a7d;
+            border-color: #3b4a7d;
+            color: white;
+            transition: background-color 0.2s;
+        }
+        .colby-blue-btn:hover {
+            background-color: #2a3562;
+            border-color: #2a3562;
+            color: white;
+        }
