@@ -298,3 +298,11 @@ def delete_item(item_id):
     db.session.commit()
     flash("Item deleted successfully.", "success")
     return redirect(url_for('main.my_listings'))
+
+
+@main.route('/contact-us', methods=['GET'])
+def contact_us():
+    """
+    Displays the contact us page.
+    """
+    return render_template('contact_us.html')
