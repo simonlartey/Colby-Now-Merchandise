@@ -18,7 +18,15 @@ def create_app():
 
     # Basic app configuration
     app.secret_key = os.getenv("SECRET_KEY", "dev_secret_key")
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
+
+    # Get database URL
+    database_url = os.getenv("DATABASE_URL", "sqlite:///users.db")
+
+    # Format Postgres URLs for SQLAlchemy
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB max uploaded file size
 

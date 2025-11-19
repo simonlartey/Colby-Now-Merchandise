@@ -4,36 +4,38 @@
 
       <!-- Brand -->
       <div class="d-flex align-items-center gap-3">
-        <img src="{{ url_for('static', filename='images/colbynow_merch_logo.png') }}" 
-             alt="ColbyNow Logo"
-             class="rounded-circle" style="height: 2.5rem; width: 2.5rem;">
+        <img src="{{ url_for('static', filename='images/colbynow_merch_logo.png') }}" alt="ColbyNow Logo"
+          class="rounded-circle" style="height: 2.5rem; width: 2.5rem;">
         <span class="fs-5 fw-bold text-dark">ColbyNow Merchandise</span>
       </div>
 
       <!-- Navigation Links -->
       <div class="d-none d-md-flex align-items-center gap-4">
         <a href="{{ url_for('main.home') }}"
-           class="text-decoration-none fw-medium {% if request.endpoint == 'main.home' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
-           Home
+          class="text-decoration-none fw-medium {% if request.endpoint == 'main.home' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+          Home
         </a>
 
         <a href="{{ url_for('main.buy_item') }}"
-           class="text-decoration-none fw-medium {% if request.endpoint == 'main.buy_item' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
-           Buy
+          class="text-decoration-none fw-medium {% if request.endpoint == 'main.buy_item' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+          Buy
         </a>
 
         <a href="{{ url_for('main.post_item') }}"
-           class="text-decoration-none fw-medium {% if request.endpoint == 'main.post_item' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
-           Sell or Donate
+          class="text-decoration-none fw-medium {% if request.endpoint == 'main.post_item' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+          Sell or Donate
         </a>
 
         <a href="{{ url_for('main.my_listings') }}"
-           class="text-decoration-none fw-medium {% if request.endpoint == 'main.my_listings' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
-           My Listings
+          class="text-decoration-none fw-medium {% if request.endpoint == 'main.my_listings' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+          My Listings
         </a>
 
         <a href="#" class="text-secondary text-decoration-none fw-medium">About</a>
-        <a href="#" class="text-secondary text-decoration-none fw-medium">Contact</a>
+        <a href="{{ url_for('main.contact_us') }}"
+          class="text-decoration-none fw-medium {% if request.endpoint == 'main.contact_us' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+          Contact Us
+        </a>
       </div>
 
       <!-- Right Section -->
@@ -41,13 +43,8 @@
 
         <!-- Search Form -->
         <form method="GET" action="{{ request.path }}" class="d-flex align-items-center position-relative">
-          <input 
-            type="text" 
-            name="search" 
-            class="form-control search-input ps-5" 
-            placeholder="Search items..." 
-            value="{{ request.args.get('search', '') }}"
-          >
+          <input type="text" name="search" class="form-control search-input ps-5" placeholder="Search items..."
+            value="{{ request.args.get('search', '') }}">
           <i class="bi bi-search search-icon"></i>
         </form>
 
@@ -61,8 +58,7 @@
         </a>
 
         <!-- Logout -->
-        <a href="{{ url_for('auth.logout') }}" 
-           class="text-secondary text-decoration-none text-sm fw-medium">Logout</a>
+        <a href="{{ url_for('auth.logout') }}" class="text-secondary text-decoration-none text-sm fw-medium">Logout</a>
       </div>
     </div>
   </div>

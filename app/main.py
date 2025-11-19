@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 from .models import Item, db, User
 import os
 from datetime import datetime
+from flask_mail import Message
 
 # Create a new blueprint for main pages
 main = Blueprint("main", __name__)
@@ -32,7 +33,7 @@ def home():
         return render_template(
             "home.html",
             user=current_user,
-            category_items=[],     # Skip category display during search
+            category_items=[],  # Skip category display during search
             recent_items=results,  # Reuse this section to show results
             current_search=search,
         )
@@ -218,7 +219,7 @@ def seller_details(seller_id):
     return render_template("sellers_details.html", seller=seller)
 
 
-@main.route('/my_listings')
+@main.route("/my_listings")
 @login_required
 def my_listings():
     """Display all items posted by the logged-in user."""
@@ -229,34 +230,36 @@ def my_listings():
     if not items:
         flash("You haven’t posted any listings yet.", "info")
 
-    return render_template('my_listings.html', items=items, user=current_user, current_search=search)
+    return render_template(
+        "my_listings.html", items=items, user=current_user, current_search=search
+    )
 
 
-@main.route('/edit_item/<int:item_id>', methods=['GET', 'POST'])
+@main.route("/edit_item/<int:item_id>", methods=["GET", "POST"])
 @login_required
 def edit_item(item_id):
     item = Item.query.get_or_404(item_id)
 
     if item.seller_id != current_user.id:
         flash("Unauthorized action.", "danger")
-        return redirect(url_for('main.my_listings'))
+        return redirect(url_for("main.my_listings"))
 
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
-            item.title = request.form.get('title', item.title).strip()
-            item.description = request.form.get('description', item.description).strip()
-            item.category = request.form.get('category', item.category).strip()
-            item.size = request.form.get('size', item.size).strip()
-            item.seller_type = request.form.get('seller_type', item.seller_type).strip()
-            item.condition = request.form.get('condition', item.condition).strip()
+            item.title = request.form.get("title", item.title).strip()
+            item.description = request.form.get("description", item.description).strip()
+            item.category = request.form.get("category", item.category).strip()
+            item.size = request.form.get("size", item.size).strip()
+            item.seller_type = request.form.get("seller_type", item.seller_type).strip()
+            item.condition = request.form.get("condition", item.condition).strip()
 
-            price_str = request.form.get('price', str(item.price))
+            price_str = request.form.get("price", str(item.price))
             try:
                 price_clean = price_str.replace("$", "").replace(",", "").strip()
                 item.price = float(price_clean)
             except ValueError:
                 flash("Invalid price. Please enter a valid number.", "danger")
-                return redirect(url_for('main.edit_item', item_id=item.id))
+                return redirect(url_for("main.edit_item", item_id=item.id))
 
             if "image" in request.files:
                 file = request.files["image"]
@@ -269,7 +272,9 @@ def edit_item(item_id):
                     ):
                         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                         filename = f"{timestamp}_{filename}"
-                        upload_folder = os.path.join(current_app.static_folder, "uploads")
+                        upload_folder = os.path.join(
+                            current_app.static_folder, "uploads"
+                        )
                         os.makedirs(upload_folder, exist_ok=True)
                         filepath = os.path.join(upload_folder, filename)
                         file.save(filepath)
@@ -277,24 +282,94 @@ def edit_item(item_id):
 
             db.session.commit()
             flash("Listing updated successfully!", "success")
-            return redirect(url_for('main.my_listings'))
+            return redirect(url_for("main.my_listings"))
 
         except Exception as e:
             db.session.rollback()
             flash(f"Error updating item: {str(e)}", "danger")
-            return redirect(url_for('main.edit_item', item_id=item.id))
+            return redirect(url_for("main.edit_item", item_id=item.id))
 
-    return render_template('edit_item.html', item=item)
+    return render_template("edit_item.html", item=item)
 
 
-@main.route('/delete_item/<int:item_id>', methods=['POST'])
+@main.route("/delete_item/<int:item_id>", methods=["POST"])
 @login_required
 def delete_item(item_id):
     item = Item.query.get_or_404(item_id)
     if item.seller_id != current_user.id:
         flash("Unauthorized action.", "danger")
-        return redirect(url_for('main.my_listings'))
+        return redirect(url_for("main.my_listings"))
     db.session.delete(item)
     db.session.commit()
     flash("Item deleted successfully.", "success")
     return redirect(url_for('main.my_listings'))
+
+@main.route('/favorites')
+@login_required
+def favorites():
+    fav_items = current_user.favorites.all() if hasattr(current_user.favorites, 'all') else list(current_user.favorites)
+    return render_template('favorites.html', favorites=fav_items)
+
+@main.route('/favorites/add/<int:item_id>', methods=['POST'])
+@login_required
+def add_favorite(item_id):
+    item = Item.query.get_or_404(item_id)
+    if not current_user.favorites.filter_by(id=item.id).first():
+        current_user.favorites.append(item)
+        db.session.commit()
+        flash('Added to favorites', 'success')
+    return redirect(request.referrer or url_for('main.favorites'))
+
+@main.route('/favorites/remove/<int:item_id>')
+@login_required
+def remove_favorite(item_id):
+    item = Item.query.get_or_404(item_id)
+    if current_user.favorites.filter_by(id=item.id).first():
+        current_user.favorites.remove(item)
+        db.session.commit()
+        flash('Removed from favorites', 'success')
+    return redirect(request.referrer or url_for('main.favorites'))
+
+
+@main.route("/contact_us", methods=["GET", "POST"])
+def contact_us():
+    """
+    Displays the contact us page and handles form submissions.
+    """
+    if request.method == "POST":
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
+        email = request.form.get("email")
+        message = request.form.get("message")
+        affiliation = request.form.get("affiliation")
+        phone_number = request.form.get("phone_number")
+
+        # Email the support team
+        msg = Message(
+            subject="New Contact Form Submission",
+            sender=current_app.config["MAIL_USERNAME"],
+            recipients=[current_app.config["MAIL_USERNAME"]],
+            body=f"""
+You have received a new message from the contact form:
+
+    Name: {first_name} {last_name}
+    Email: {email}
+    Phone: {phone_number}
+    Affiliation: {affiliation}
+
+    Message:
+    {message}
+""",
+        )
+
+        try:
+            current_app.extensions["mail"].send(msg)
+            flash(
+                f"Thank you, {first_name}! Your message has been received.", "success"
+            )
+        except Exception as e:
+            flash(f"Error sending message: {str(e)}", "danger")
+
+        return redirect(url_for("main.contact_us"))
+
+    return render_template("contact_us.html")

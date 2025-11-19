@@ -1,0 +1,47 @@
+body {
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+.navbar-public {
+    height: 80px;
+}
+.hero-section {
+    background-image: url("{{ url_for('static', filename='/static/css/images/miller_library.jpg') }}"); 
+    background-size: cover;
+    background-position: center;
+    height: 80vh;
+    min-height: 400px;
+    color: white;
+    position: relative;
+}
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 40, 120, 0.65); 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+.colby-blue-btn {
+    background-color: #3b4a7d;
+    border-color: #3b4a7d;
+    color: white;
+    transition: background-color 0.2s;
+}
+.colby-blue-btn:hover {
+    background-color: #2a3562;
+    border-color: #2a3562;
+    color: white;
+}
+.feature-icon {
+    font-size: 3.5rem;
+    color: #3b4a7d;
+    margin-bottom: 1rem;
+}
