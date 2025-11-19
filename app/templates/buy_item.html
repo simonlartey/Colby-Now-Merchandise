@@ -60,13 +60,15 @@
                         <h6 class="fw-medium mb-2">Categories</h6>
                         {% for cat in categories %}
                         <div class="form-check">
-                            <input class="form-check-input category-checkbox" type="checkbox" name="category"
-                                value="{{ cat }}" id="cat-{{ cat|lower|replace(' ', '-') }}" {% if current_category==cat
-                                %}checked{% endif %} onchange="this.form.submit()">
-                            <label class="form-check-label" for="cat-{{ cat|lower|replace(' ', '-') }}">{{ cat
-                                }}</label>
+                            <input class="form-check-input category-checkbox" type="checkbox" 
+                                name="category" value="{{ cat }}"
+                                id="cat-{{ cat|lower|replace(' ', '-') }}"
+                                {% if categories_selected and cat in categories_selected %}checked{% endif %}
+                                onchange="this.form.submit()">
+                            <label class="form-check-label" for="cat-{{ cat|lower|replace(' ', '-') }}">{{ cat }}</label>
                         </div>
                         {% endfor %}
+
                     </div>
 
                     <!-- Seller Type Filter -->
@@ -74,12 +76,15 @@
                         <h6 class="fw-medium mb-2">Seller type</h6>
                         {% for st in seller_types %}
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="seller_type" value="{{ st }}"
-                                id="seller-{{ st|lower }}" {% if current_seller_type==st %}checked{% endif %}
+                            <input class="form-check-input" type="checkbox"
+                                name="seller_type" value="{{ st }}"
+                                id="seller-{{ st|lower }}"
+                                {% if seller_types_selected and st in seller_types_selected %}checked{% endif %}
                                 onchange="this.form.submit()">
                             <label class="form-check-label" for="seller-{{ st|lower }}">{{ st }}</label>
                         </div>
                         {% endfor %}
+
                     </div>
 
                     <!-- Conditions Filter -->
@@ -87,13 +92,15 @@
                         <h6 class="fw-medium mb-2">Conditions</h6>
                         {% for cond in conditions %}
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="condition" value="{{ cond }}"
-                                id="cond-{{ cond|lower|replace(' ', '-') }}" {% if current_condition==cond %}checked{%
-                                endif %} onchange="this.form.submit()">
-                            <label class="form-check-label" for="cond-{{ cond|lower|replace(' ', '-') }}">{{ cond
-                                }}</label>
+                            <input class="form-check-input" type="checkbox"
+                                name="condition" value="{{ cond }}"
+                                id="cond-{{ cond|lower|replace(' ', '-') }}"
+                                {% if conditions_selected and cond in conditions_selected %}checked{% endif %}
+                                onchange="this.form.submit()">
+                            <label class="form-check-label" for="cond-{{ cond|lower|replace(' ', '-') }}">{{ cond }}</label>
                         </div>
                         {% endfor %}
+
                     </div>
                 </form>
             </aside>

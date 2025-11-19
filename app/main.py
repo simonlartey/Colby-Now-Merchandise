@@ -62,23 +62,20 @@ def home():
 @main.route("/buy_item")
 @login_required
 def buy_item():
-    """
-    Displays all items available for purchase with filtering and sorting.
-    """
-    category = request.args.get("category", type=str)
-    seller_type = request.args.get("seller_type", type=str)
-    condition = request.args.get("condition", type=str)
+    categories_selected = request.args.getlist("category")
+    seller_types_selected = request.args.getlist("seller_type")
+    conditions_selected = request.args.getlist("condition")
     search = request.args.get("search", type=str)
     sort_by = request.args.get("sort_by", default="newest", type=str)
 
     query = Item.search(search)
 
-    if category:
-        query = query.filter_by(category=category)
-    if seller_type:
-        query = query.filter_by(seller_type=seller_type)
-    if condition:
-        query = query.filter_by(condition=condition)
+    if categories_selected:
+        query = query.filter(Item.category.in_(categories_selected))
+    if seller_types_selected:
+        query = query.filter(Item.seller_type.in_(seller_types_selected))
+    if conditions_selected:
+        query = query.filter(Item.condition.in_(conditions_selected))
 
     if sort_by == "newest":
         query = query.order_by(Item.created_at.desc())
@@ -93,14 +90,9 @@ def buy_item():
 
     items = query.all()
 
-    all_categories = db.session.query(Item.category).distinct().all()
-    categories = [cat[0] for cat in all_categories if cat[0]]
-
-    all_seller_types = db.session.query(Item.seller_type).distinct().all()
-    seller_types = [st[0] for st in all_seller_types if st[0]]
-
-    all_conditions = db.session.query(Item.condition).distinct().all()
-    conditions = [cond[0] for cond in all_conditions if cond[0]]
+    categories = [c[0] for c in db.session.query(Item.category).distinct().all() if c[0]]
+    seller_types = [s[0] for s in db.session.query(Item.seller_type).distinct().all() if s[0]]
+    conditions = [c[0] for c in db.session.query(Item.condition).distinct().all() if c[0]]
 
     return render_template(
         "buy_item.html",
@@ -108,13 +100,14 @@ def buy_item():
         categories=categories,
         seller_types=seller_types,
         conditions=conditions,
-        current_category=category,
-        current_seller_type=seller_type,
-        current_condition=condition,
+        categories_selected=categories_selected,
+        seller_types_selected=seller_types_selected,
+        conditions_selected=conditions_selected,
         current_search=search,
         current_sort=sort_by,
         item_count=len(items),
     )
+
 
 
 @main.route("/post-item", methods=["GET", "POST"])
