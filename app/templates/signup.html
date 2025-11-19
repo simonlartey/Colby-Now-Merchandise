@@ -30,7 +30,7 @@
                 {% with messages = get_flashed_messages(with_categories=true) %}
                   {% if messages %}
                     {% for category, message in messages %}
-                      <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                         {{ message }}
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                           <span aria-hidden="true">&times;</span>
@@ -56,15 +56,32 @@
                   </div>
 
                   <div class="form-group">
-                    <input id="password-field" type="password" class="form-control" name="password" required>
-                    <label class="form-control-placeholder" for="password">Password</label>
-                    <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                      <div class="password-container">
+                          <input id="password-field" type="password" class="form-control" name="password" required>
+                          <label class="form-control-placeholder" for="password">Password</label>
+                          <span toggle="#password-field" class="fa fa-fw fa-eye toggle-password"></span>
+                      </div>
+
+                      <!-- Password Requirements Checklist -->
+                      <div id="password-rules" class="mt-2" style="font-size: 0.9rem;">
+                          <p class="mb-1"><strong>Password must include:</strong></p>
+                          <ul class="list-unstyled">
+                              <li id="rule-length" class="text-danger">✖ At least 12 characters</li>
+                              <li id="rule-upper" class="text-danger">✖ At least ONE uppercase letter (A–Z)</li>
+                              <li id="rule-lower" class="text-danger">✖ At least ONE lowercase letter (a–z)</li>
+                              <li id="rule-number" class="text-danger">✖ At least ONE number (0–9)</li>
+                              <li id="rule-special" class="text-danger">✖ At least ONE special character (!@#$…)</li>
+                          </ul>
+                      </div>
+
                   </div>
 
                   <div class="form-group">
-                    <input id="confirm-password-field" type="password" class="form-control" name="confirm_password" required>
-                    <label class="form-control-placeholder" for="confirm_password">Confirm Password</label>
-                    <span toggle="#confirm-password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                      <div class="password-container">
+                          <input id="confirm-password-field" type="password" class="form-control" name="confirm_password" required>
+                          <label class="form-control-placeholder" for="confirm_password">Confirm Password</label>
+                          <span toggle="#confirm-password-field" class="fa fa-fw fa-eye toggle-password"></span>
+                      </div>
                   </div>
 
                   <div class="form-group">

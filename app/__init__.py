@@ -1,6 +1,7 @@
-from flask import Flask, redirect, url_for, flash
+from flask import Flask, app, redirect, url_for, flash
 from flask_login import LoginManager
 from flask_mail import Mail
+from flask_dance.contrib.google import make_google_blueprint
 from .models import db, User
 from .auth import auth
 from .main import main
@@ -52,6 +53,20 @@ def create_app():
     # Register blueprints
     app.register_blueprint(auth, url_prefix="/auth")
     app.register_blueprint(main)
+    
+    # OAuth setup for Google Login
+    google_bp = make_google_blueprint(
+        client_id=os.getenv("GOOGLE_CLIENT_ID"),
+        client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+        scope=[
+            "openid",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/userinfo.email",
+        ],
+        redirect_url="/auth/google"
+    )
+    app.register_blueprint(google_bp, url_prefix="/login")
+
 
     # Create tables if missing
     with app.app_context():

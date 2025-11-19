@@ -12,6 +12,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required
 from itsdangerous import URLSafeTimedSerializer
 from .models import User, db
+from .validators import is_valid_email, is_strong_password
+from flask_dance.contrib.google import google
+import os
+
 
 # blueprint for authenticaiton routes
 auth = Blueprint("auth", __name__)
@@ -42,6 +46,12 @@ def signup():
         if password != confirm_password:
             flash("Passwords do not match.", "danger")
             return redirect(url_for("auth.signup"))
+        
+        # Validate strong password
+        if not is_strong_password(password):
+            flash("Password must be at least 12 characters and include both letters and numbers.", "danger")
+            return redirect(url_for("auth.signup"))
+
 
         # Create new user with hashed password
         hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
@@ -50,8 +60,30 @@ def signup():
         db.session.add(new_user)
         db.session.commit()
 
-        flash("Account created successfully! Please log in.", "success")
+        # Generate verification token
+        s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
+        token = s.dumps(email, salt="email-verify-salt")
+
+        verify_url = url_for("auth.verify_email", token=token, _external=True)
+
+        # Send verification email
+        msg = Message(
+            subject="Verify Your ColbyNow Account",
+            sender=current_app.config["MAIL_USERNAME"],
+            recipients=[email],
+            body=(
+                f"Hi {name},\n\n"
+                f"Please verify your account by clicking the link below:\n{verify_url}\n\n"
+                f"This link expires in 1 hour.\n\n"
+                f"If you did not sign up, simply ignore this email."
+            ),
+        )
+
+        current_app.extensions["mail"].send(msg)
+
+        flash("Account created! Please check your email to verify your account.", "info")
         return redirect(url_for("auth.login"))
+
 
     return render_template("signup.html")
 
@@ -60,17 +92,36 @@ def signup():
 @auth.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
-        password = request.form.get("password", "").strip()
-        remember = True if request.form.get("remember") else False
 
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+
+        # Empty fields
+        if not email or not password:
+            flash("Please enter both email and password.", "danger")
+            return redirect(url_for("auth.login"))
+
+        # Retrieve user
         user = User.query.filter_by(email=email).first()
 
-        if not user or not check_password_hash(user.password, password):
+        # Timing protection
+        if not user:
+            check_password_hash(generate_password_hash("fallback123!"), password)
             flash("Invalid email or password.", "danger")
             return redirect(url_for("auth.login"))
 
-        login_user(user, remember=remember)
+        # Wrong password
+        if not check_password_hash(user.password, password):
+            flash("Invalid email or password.", "danger")
+            return redirect(url_for("auth.login"))
+
+        # STEP 4 — Prevent login if account is not verified
+        if not user.is_verified:
+            flash("Please verify your email before logging in. Check your inbox.", "warning")
+            return redirect(url_for("auth.login"))
+
+        # Success
+        login_user(user, remember=bool(request.form.get("remember")))
         flash("Login successful!", "success")
         return redirect(url_for("main.home"))
 
@@ -122,6 +173,8 @@ def forgot_password():
     return render_template("forgot_password.html")
 
 
+# ---------- RESET PASSWORD ----------
+
 @auth.route("/reset-password/<token>", methods=["GET", "POST"])
 def reset_password(token):
     """Resets the user's password using a token sent via email."""
@@ -152,3 +205,72 @@ def reset_password(token):
         return redirect(url_for("auth.login"))
 
     return render_template("reset_password.html", token=token)
+
+
+
+# ---------- EMAIL VERIFICATION ----------
+@auth.route("/verify/<token>")
+def verify_email(token):
+    """Verifies a user's email using the token sent after signup."""
+    try:
+        s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
+        email = s.loads(token, salt="email-verify-salt", max_age=3600)
+    except Exception:
+        flash("The verification link is invalid or has expired.", "danger")
+        return redirect(url_for("auth.signup"))
+
+    # Find user
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        flash("User not found.", "danger")
+        return redirect(url_for("auth.signup"))
+
+    # If already verified
+    if user.is_verified:
+        flash("Your account is already verified. Please log in.", "info")
+        return redirect(url_for("auth.login"))
+
+    # Mark user as verified
+    user.is_verified = True
+    db.session.commit()
+
+    flash("Your email has been verified! You can now log in.", "success")
+    return redirect(url_for("auth.login"))
+
+
+
+# ---------- GOOGLE LOGIN ----------
+
+@auth.route("/google")
+def google_login():
+    if not google.authorized:
+        return redirect(url_for("google.login"))
+
+    resp = google.get("https://www.googleapis.com/oauth2/v3/userinfo")
+    user_info = resp.json()
+
+    email = user_info["email"]
+    name = user_info.get("name", "Google User")
+
+    # --- Restrict Google login to Colby emails ---
+    if not email.endswith("@colby.edu"):
+        flash("Please use your @colby.edu email address to sign in.", "danger")
+        return redirect(url_for("auth.login"))
+
+    # Check if user exists
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        user = User(
+            name=name,
+            email=email,
+            password=generate_password_hash(os.urandom(16).hex()),
+            is_verified=True
+        )
+        db.session.add(user)
+        db.session.commit()
+
+    login_user(user)
+    flash("Logged in with Google!", "success")
+    return redirect(url_for("main.home"))

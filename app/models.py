@@ -19,6 +19,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(200), nullable=False)
     name = db.Column(db.String(150), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_verified = db.Column(db.Boolean, default=False)
     favorites = db.relationship('Item', secondary=favorites_table,
                                 backref=db.backref('favorited_by', lazy='dynamic'),
                                 lazy='dynamic')

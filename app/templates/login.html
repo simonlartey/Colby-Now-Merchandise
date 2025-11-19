@@ -30,7 +30,7 @@
                 {% with messages = get_flashed_messages(with_categories=true) %}
                   {% if messages %}
                     {% for category, message in messages %}
-                      <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                         {{ message }}
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                           <span aria-hidden="true">&times;</span>
@@ -69,6 +69,13 @@
                     <a href="{{ url_for('auth.forgot_password') }}" class="text-warning">Forgot Password?</a>
                   </div>                  
                 </form>
+
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('google.login') }}" class="google-btn w-100">
+                        <img src="https://developers.google.com/identity/images/g-logo.png" class="google-icon" alt="Google Icon">
+                        <span>Sign in with Google</span>
+                    </a>
+                </div>
 
                 <p class="text-center mt-3">
                   Not a member? <a href="{{ url_for('auth.signup') }}" class="text-warning fw-bold">Sign Up</a>
