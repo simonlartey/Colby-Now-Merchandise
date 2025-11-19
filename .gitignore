@@ -25,3 +25,5 @@ app/static/uploads
 dist/
 build/
 .env
+
+/private
