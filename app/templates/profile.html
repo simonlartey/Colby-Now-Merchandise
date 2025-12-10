@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Global Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .profile-card img {
+            width: 150px;
+            height: 150px;
+            border: 3px solid #e2e5e7;
+            object-fit: cover;
+        }
+
+        .stat-card {
+            border-left: 4px solid #0d6efd;
+            transition: 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+    {% include "_navbar.html" %}
+
+    <main class="container py-5">
+
+        <h2 class="fw-bold mb-4 text-center text-md-start">My Profile</h2>
+
+        <div class="row g-4">
+
+            <!-- LEFT SECTION — Profile -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm p-4 text-center profile-card">
+
+                    <!-- Profile Image -->
+                    <img src="{{ url_for('static', filename=user.profile_image or 'images/default_user_profile.png') }}"
+                        class="rounded-circle mb-3 mx-auto d-block" width="150" height="150" alt="Profile Image">
+
+                    <h4 class="fw-bold mt-2">{{ user.first_name }} {{ user.last_name }}</h4>
+                    <p class="text-muted">{{ user.email }}</p>
+
+                    <button class="btn btn-outline-primary w-100 mt-3" data-bs-toggle="modal"
+                        data-bs-target="#editProfileModal">
+                        Edit Profile
+                    </button>
+
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-danger w-100 mt-2">
+                        Logout
+                    </a>
+                </div>
+            </div>
+
+            <!-- RIGHT SECTION — Stats + Activity -->
+            <div class="col-lg-8">
+
+                <!-- Stats Cards -->
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-4">
+                        <a href="{{ url_for('main.favorites') }}" class="text-decoration-none">
+                            <div class="card shadow-sm p-3 text-center stat-card">
+                                <h3 class="fw-bold text-primary">{{ favorites|length }}</h3>
+                                <p class="mb-0 text-dark">Favorites</p>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-4">
+                        <a href="{{ url_for('main.my_orders') }}" class="text-decoration-none">
+                            <div class="card shadow-sm p-3 text-center stat-card">
+                                <h3 class="fw-bold text-success">{{ orders|length }}</h3>
+                                <p class="mb-0 text-dark">Orders Placed</p>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-4">
+                        <a href="{{ url_for('main.my_listings') }}" class="text-decoration-none">
+                            <div class="card shadow-sm p-3 text-center stat-card">
+                                <h3 class="fw-bold text-info">{{ listings|length }}</h3>
+                                <p class="mb-0 text-dark">Listings Posted</p>
+                            </div>
+                        </a>
+                    </div>
+
+                </div>
+
+                <!-- Recent Activity Placeholder -->
+                <div class="card shadow-sm p-4">
+                    <h5 class="fw-bold mb-3">Recently Viewed</h5>
+
+                    {% if recent_items %}
+                    <ul class="list-group mb-3">
+                        {% for item in recent_items %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ item.title }}</span>
+                            <a href="{{ url_for('main.item_details', item_id=item.id) }}" class="text-primary">
+                                View
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">No recently viewed items yet.</p>
+                    {% endif %}
+
+
+                    <hr class="my-4">
+
+                    <h5 class="fw-bold mb-3">Order Timeline</h5>
+
+                    {% if orders %}
+                    <ul class="list-group mb-3">
+                        {% for order in orders %}
+                        <li class="list-group-item">
+                            <div class="d-flex align-items-center justify-content-between">
+
+                                <!-- LEFT: Thumbnail + item info -->
+                                <div class="d-flex align-items-center">
+
+                                    <!-- Thumbnail -->
+                                    <a href="{{ url_for('main.item_details', item_id=order.item.id) }}">
+                                        <img src="{{ url_for('static', filename=order.item.image_url) if order.item.image_url else url_for('static', filename='images/default_item.png') }}"
+                                            alt="{{ order.item.title }}" class="me-3"
+                                            style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;">
+                                    </a>
+
+                                    <!-- Title + Status -->
+                                    <div>
+                                        <a href="{{ url_for('main.item_details', item_id=order.item.id) }}"
+                                            class="fw-bold text-dark text-decoration-none">
+                                            {{ order.item.title }}
+                                        </a><br>
+
+                                        {% if order.status == 'pending' %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                        {% elif order.status == 'approved' %}
+                                        <span class="badge bg-success">Approved</span>
+                                        {% elif order.status == 'delivered' %}
+                                        <span class="badge bg-info text-dark">Delivered</span>
+                                        {% elif order.status == 'rejected' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- RIGHT: Date -->
+                                <small class="text-muted">
+                                    {{ order.created_at.strftime('%b %d, %Y') }}
+                                </small>
+
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">No orders yet.</p>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ================== EDIT PROFILE MODAL ================== -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form method="POST" action="{{ url_for('main.update_profile') }}" enctype="multipart/form-data">
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Profile Photo</label>
+                            <input type="file" name="profile_image" class="form-control">
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

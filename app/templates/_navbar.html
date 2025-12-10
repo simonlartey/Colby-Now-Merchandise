@@ -1,68 +1,104 @@
 <nav class="bg-white shadow-sm">
   <div class="container-xl">
-    <div class="d-flex justify-content-between align-items-center" style="height: 5rem;">
 
-      <!-- Brand -->
-      <div class="d-flex align-items-center gap-3">
+    <!-- ================= ROW 1 — LOGO + GLOBAL SEARCH + PROFILE/LOGOUT ================= -->
+    <div class="d-flex justify-content-between align-items-center py-3">
+
+      <!-- Brand (clickable home link) -->
+      <a href="{{ url_for('main.home') }}" class="d-flex align-items-center gap-3 text-decoration-none">
         <img src="{{ url_for('static', filename='images/colbynow_merch_logo.png') }}" alt="ColbyNow Logo"
           class="rounded-circle" style="height: 2.5rem; width: 2.5rem;">
+
         <span class="fs-5 fw-bold text-dark">ColbyNow Merchandise</span>
-      </div>
+      </a>
 
-      <!-- Navigation Links -->
-      <div class="d-none d-md-flex align-items-center gap-4">
-        <a href="{{ url_for('main.home') }}"
-          class="text-decoration-none fw-medium {% if request.endpoint == 'main.home' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
-          Home
-        </a>
+      <!-- GLOBAL SEARCH BAR -->
+      <form id="global-search-form" method="GET" action="{{ url_for('main.buy_item') }}"
+        class="d-flex position-relative flex-grow-1 mx-4" autocomplete="off">
 
-        <a href="{{ url_for('main.buy_item') }}"
-          class="text-decoration-none fw-medium {% if request.endpoint == 'main.buy_item' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
-          Buy
-        </a>
+        <input id="global-search-input" name="search" type="text" class="form-control px-4"
+          placeholder="Search items..."
+          value="{% if request.endpoint in ['main.home', 'main.buy_item'] %}{{ request.args.get('search', '') }}{% endif %}"
+          style="height: 45px; border-radius: 25px 0 0 25px;">
 
-        <a href="{{ url_for('main.post_item') }}"
-          class="text-decoration-none fw-medium {% if request.endpoint == 'main.post_item' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
-          Sell or Donate
-        </a>
+        <button type="submit" class="btn btn-primary px-4" style="height: 45px; border-radius: 0 25px 25px 0;">
+          <i class="bi bi-search"></i>
+        </button>
 
-        <a href="{{ url_for('main.my_listings') }}"
-          class="text-decoration-none fw-medium {% if request.endpoint == 'main.my_listings' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
-          My Listings
-        </a>
-
-        <a href="{{ url_for('main.my_orders') }}"
-          class="text-decoration-none fw-medium {% if request.endpoint == 'main.my_orders' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
-          My Orders
-        </a>
-        <a href="{{ url_for('main.contact_us') }}"
-          class="text-decoration-none fw-medium {% if request.endpoint == 'main.contact_us' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
-          Contact Us
-        </a>
-      </div>
+        <!-- AUTOCOMPLETE DROPDOWN -->
+        <div id="search-suggestions" class="position-absolute bg-white border rounded shadow-sm mt-2 w-100"
+          style="z-index: 2000; display: none; top: 48px;"></div>
+      </form>
 
       <!-- Right Section -->
       <div class="d-flex align-items-center gap-4">
 
-        <!-- Search Form -->
-        <form method="GET" action="{{ request.path }}" class="d-flex align-items-center position-relative">
-          <input type="text" name="search" class="form-control search-input ps-5" placeholder="Search items..."
-            value="{{ request.args.get('search', '') }}">
-          <i class="bi bi-search search-icon"></i>
-        </form>
+        <!-- PROFILE -->
+        <a href="{{ url_for('main.profile') }}" class="d-flex align-items-center text-decoration-none gap-2">
 
+          <img src="{{ url_for('static', filename=current_user.profile_image or 'images/default_user_profile.png') }}"
+            class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #e2e6ea;"
+            alt="Profile">
 
-        <!-- Cart Icon -->
-        <a href="#" class="text-secondary text-decoration-none position-relative">
-          <i class="bi bi-cart3 fs-4"></i>
-          <span class="badge bg-light text-dark border rounded-pill position-absolute top-0 start-100 translate-middle">
-            3
-          </span>
+          <span class="nav-profile-text">Profile</span>
         </a>
 
-        <!-- Logout -->
-        <a href="{{ url_for('auth.logout') }}" class="text-secondary text-decoration-none text-sm fw-medium">Logout</a>
+        <!-- LOGOUT -->
+        <a href="{{ url_for('auth.logout') }}" class="nav-profile-text text-decoration-none">
+          Logout
+        </a>
+
+
       </div>
     </div>
+
+    <!-- ================= ROW 2 — NAVIGATION ================= -->
+    <div class="d-flex justify-content-center align-items-center gap-4 border-top pt-3 pb-2">
+
+      <a href="{{ url_for('main.home') }}" class="text-decoration-none fw-medium 
+         {% if request.endpoint == 'main.home' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+        Home
+      </a>
+
+      <a href="{{ url_for('main.buy_item') }}" class="text-decoration-none fw-medium 
+         {% if request.endpoint == 'main.buy_item' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+        Buy
+      </a>
+
+      <a href="{{ url_for('main.post_item') }}" class="text-decoration-none fw-medium 
+         {% if request.endpoint == 'main.post_item' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+        Sell or Donate
+      </a>
+
+      <a href="{{ url_for('main.my_listings') }}" class="text-decoration-none fw-medium 
+         {% if request.endpoint == 'main.my_listings' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+        My Listings
+      </a>
+
+      <a href="{{ url_for('main.my_orders') }}" class="text-decoration-none fw-medium 
+         {% if request.endpoint == 'main.my_orders' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+        My Orders
+      </a>
+
+      <a href="{{ url_for('main.contact_us') }}" class="text-decoration-none fw-medium 
+         {% if request.endpoint == 'main.contact_us' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+        Contact Us
+      </a>
+
+      <a href="{{ url_for('main.favorites') }}" class="text-decoration-none fw-medium 
+         {% if request.endpoint == 'main.favorites' %}text-primary fw-bold{% else %}text-secondary{% endif %}">
+        Favorites
+      </a>
+
+    </div>
+
   </div>
 </nav>
+
+<script src="{{ url_for('static', filename='js/search_autocomplete.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Flash Messages (Global) -->
+<div class="container-xl mt-3">
+  {% include "_flash_messages.html" %}
+</div>

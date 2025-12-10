@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Item Details - ColbyNow</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
 
 </head>
+
 <body>
 
     {% include "_navbar.html" %}
@@ -23,7 +26,8 @@
             <div class="col-lg-7">
                 <div class="bg-white p-3 rounded border shadow-sm">
                     {% if item.image_url %}
-                    <img src="{{ url_for('static', filename=item.image_url) }}" class="img-fluid rounded" alt="{{ item.title }}">
+                    <img src="{{ url_for('static', filename=item.image_url) }}" class="img-fluid rounded"
+                        alt="{{ item.title }}">
                     {% else %}
                     <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
                         <i class="bi bi-image fs-1 text-muted"></i>
@@ -65,8 +69,10 @@
                     </div>
 
                     <div class="d-grid gap-3 mt-auto pt-4">
-                        <a href="{{ url_for('main.place_order', item_id=item.id) }}" class="btn btn-primary btn-lg">Place an Order</a>
-                        <a href="{{ url_for('main.seller_details', seller_id=item.seller_id) }}" class="btn btn-outline-primary">Contact Seller</a>
+                        <a href="{{ url_for('main.place_order', item_id=item.id) }}"
+                            class="btn btn-primary btn-lg">Place an Order</a>
+                        <a href="{{ url_for('main.seller_details', seller_id=item.seller_id) }}"
+                            class="btn btn-outline-primary">Contact Seller</a>
                     </div>
                 </div>
             </div>
@@ -76,7 +82,7 @@
     <footer class="bg-light border-top mt-5 pt-5">
         <div class="container-xl py-5">
             <div class="row justify-content-between align-items-center gy-4">
-                
+
                 <div class="col-md-6 col-lg-5">
                     <h3 class="fs-2 fw-bold text-dark mb-2">Sign up for our newsletter</h3>
                     <p class="text-secondary mb-4">Be the first to know about our special offers, news, and updates.</p>
@@ -90,27 +96,35 @@
 
                 <div class="col-md-6 col-lg-auto">
                     <nav class="d-flex flex-wrap justify-content-center justify-content-md-end gap-3 gap-lg-4">
-                        <a href="{{ url_for('main.home') }}" class="text-secondary text-decoration-none fw-medium">Home</a>
+                        <a href="{{ url_for('main.home') }}"
+                            class="text-secondary text-decoration-none fw-medium">Home</a>
                         <a href="#" class="text-secondary text-decoration-none fw-medium">About</a>
-                        <a href="{{ url_for('main.buy_item') }}" class="text-secondary text-decoration-none fw-medium">Browse Items</a>
-                        <a href="{{ url_for('main.post_item') }}" class="text-secondary text-decoration-none fw-medium">Post an Item</a>
+                        <a href="{{ url_for('main.buy_item') }}"
+                            class="text-secondary text-decoration-none fw-medium">Browse Items</a>
+                        <a href="{{ url_for('main.post_item') }}"
+                            class="text-secondary text-decoration-none fw-medium">Post an Item</a>
                         <a href="#" class="text-secondary text-decoration-none fw-medium">FAQs</a>
                         <a href="#" class="text-secondary text-decoration-none fw-medium">Contact Us</a>
                     </nav>
                 </div>
             </div>
         </div>
-        
+
         <div class="py-4 text-white-50" style="background-color: #002878;">
             <div class="container-xl">
-                <div class="d-flex flex-column flex-sm-row justify-content-between text-center text-sm-start" style="font-size: 0.75rem;">
-                    <p class="mb-2 mb-sm-0">&copy; 2025 Colby Now Merchandise | Built by BitWise CacheFlow | Powered by Colby College ITS</p>
+                <div class="d-flex flex-column flex-sm-row justify-content-between text-center text-sm-start"
+                    style="font-size: 0.75rem;">
+                    <p class="mb-2 mb-sm-0">&copy; 2025 Colby Now Merchandise | Built by BitWise CacheFlow | Powered by
+                        Colby College ITS</p>
                     <p>COPYRIGHTS COLBY.EDU. ALL RIGHTS RESERVED</p>
                 </div>
             </div>
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
 </body>
+
 </html>

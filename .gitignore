@@ -26,4 +26,6 @@ dist/
 build/
 .env
 
+# private files and directories
 /private
+app/static/profile_images

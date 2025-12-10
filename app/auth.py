@@ -26,11 +26,12 @@ auth = Blueprint("auth", __name__)
 def signup():
     if request.method == "POST":
         # Safely retrieve and clean form data
-        name = request.form.get("name", "").strip()
+        first_name = request.form.get("first_name", "").strip()
+        last_name = request.form.get("last_name", "").strip()
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "").strip()
         confirm_password = request.form.get("confirm_password", "").strip()
-        
+
         # Restrict signup to Colby College emails only
         if not email.endswith("@colby.edu"):
             flash("Please use your Colby College email address.", "danger")
@@ -46,16 +47,23 @@ def signup():
         if password != confirm_password:
             flash("Passwords do not match.", "danger")
             return redirect(url_for("auth.signup"))
-        
+
         # Validate strong password
         if not is_strong_password(password):
-            flash("Password must be at least 12 characters and include both letters and numbers.", "danger")
+            flash(
+                "Password must be at least 12 characters and include both letters and numbers.",
+                "danger",
+            )
             return redirect(url_for("auth.signup"))
-
 
         # Create new user with hashed password
         hashed_password = generate_password_hash(password, method="pbkdf2:sha256")
-        new_user = User(name=name, email=email, password=hashed_password)
+        new_user = User(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=hashed_password,
+        )
 
         db.session.add(new_user)
         db.session.commit()
@@ -72,7 +80,7 @@ def signup():
             sender=current_app.config["MAIL_USERNAME"],
             recipients=[email],
             body=(
-                f"Hi {name},\n\n"
+                f"Hi {first_name},\n\n"
                 f"Please verify your account by clicking the link below:\n{verify_url}\n\n"
                 f"This link expires in 1 hour.\n\n"
                 f"If you did not sign up, simply ignore this email."
@@ -81,9 +89,10 @@ def signup():
 
         current_app.extensions["mail"].send(msg)
 
-        flash("Account created! Please check your email to verify your account.", "info")
+        flash(
+            "Account created! Please check your email to verify your account.", "info"
+        )
         return redirect(url_for("auth.login"))
-
 
     return render_template("signup.html")
 
@@ -117,7 +126,10 @@ def login():
 
         # STEP 4 — Prevent login if account is not verified
         if not user.is_verified:
-            flash("Please verify your email before logging in. Check your inbox.", "warning")
+            flash(
+                "Please verify your email before logging in. Check your inbox.",
+                "warning",
+            )
             return redirect(url_for("auth.login"))
 
         # Success
@@ -175,6 +187,7 @@ def forgot_password():
 
 # ---------- RESET PASSWORD ----------
 
+
 @auth.route("/reset-password/<token>", methods=["GET", "POST"])
 def reset_password(token):
     """Resets the user's password using a token sent via email."""
@@ -205,7 +218,6 @@ def reset_password(token):
         return redirect(url_for("auth.login"))
 
     return render_template("reset_password.html", token=token)
-
 
 
 # ---------- EMAIL VERIFICATION ----------
@@ -239,8 +251,8 @@ def verify_email(token):
     return redirect(url_for("auth.login"))
 
 
-
 # ---------- GOOGLE LOGIN ----------
+
 
 @auth.route("/google")
 def google_login():
@@ -262,11 +274,17 @@ def google_login():
     user = User.query.filter_by(email=email).first()
 
     if not user:
+        # Split name into first/last
+        name_parts = name.split(" ", 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ""
+
         user = User(
-            name=name,
+            first_name=first_name,
+            last_name=last_name,
             email=email,
             password=generate_password_hash(os.urandom(16).hex()),
-            is_verified=True
+            is_verified=True,
         )
         db.session.add(user)
         db.session.commit()

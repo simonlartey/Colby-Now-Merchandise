@@ -7,20 +7,31 @@ from .auth import auth
 from .main import main
 import os
 from werkzeug.exceptions import RequestEntityTooLarge
+from flask_migrate import Migrate
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # Create a Mail instance globally
 mail = Mail()
 
+# Initialize Flask-Migrate
+migrate = Migrate()
+
 
 def create_app():
     app = Flask(__name__, template_folder="templates", static_folder="static")
+    os.makedirs(app.instance_path, exist_ok=True)
 
     # Basic app configuration
     app.secret_key = os.getenv("SECRET_KEY", "dev_secret_key")
 
     # Get database URL
     database_url = os.getenv("DATABASE_URL", "sqlite:///users.db")
+
+    if database_url == "sqlite:///users.db":
+        database_url = f"sqlite:///{os.path.join(app.instance_path, 'users.db')}"
 
     # Format Postgres URLs for SQLAlchemy
     if database_url.startswith("postgres://"):
@@ -34,16 +45,23 @@ def create_app():
     app.config["MAIL_SERVER"] = "smtp.gmail.com"
     app.config["MAIL_PORT"] = 587
     app.config["MAIL_USE_TLS"] = True
-    app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")  # add to .env
-    app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")  # add to .env
+    app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+    app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
 
-    # Initialize database and mail
+    # Stripe Configuration
+    app.config["STRIPE_SECRET_KEY"] = os.getenv("STRIPE_SECRET_KEY")
+    app.config["STRIPE_PUBLIC_KEY"] = os.getenv("STRIPE_PUBLIC_KEY")
+
+    # Initialize database and mail, migrate
     db.init_app(app)
     mail.init_app(app)
+    migrate.init_app(app, db)
+    from . import models
 
     # Login manager setup
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
+    login_manager.login_message_category = "info"
     login_manager.init_app(app)
 
     @login_manager.user_loader
@@ -53,7 +71,7 @@ def create_app():
     # Register blueprints
     app.register_blueprint(auth, url_prefix="/auth")
     app.register_blueprint(main)
-    
+
     # OAuth setup for Google Login
     google_bp = make_google_blueprint(
         client_id=os.getenv("GOOGLE_CLIENT_ID"),
@@ -63,14 +81,9 @@ def create_app():
             "https://www.googleapis.com/auth/userinfo.profile",
             "https://www.googleapis.com/auth/userinfo.email",
         ],
-        redirect_url="/auth/google"
+        redirect_url="/auth/google",
     )
     app.register_blueprint(google_bp, url_prefix="/login")
-
-
-    # Create tables if missing
-    with app.app_context():
-        db.create_all()
 
     # Error handler for file size limit
     @app.errorhandler(RequestEntityTooLarge)

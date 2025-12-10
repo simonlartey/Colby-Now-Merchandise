@@ -91,7 +91,15 @@ MAIL_PASSWORD="your-gmail-app-password"
 ```
 **Note:** For the `MAIL_PASSWORD`, it is highly recommended to use a Google App Password if you have 2-Factor Authentication enabled on your Google account.
 
-### 4. Run the Application
+
+### 4. Initialize the Database
+Run the following command to set up the database tables:
+```bash
+flask db upgrade
+```
+*Note: If you have an existing `users.db` from a previous version and encounter errors, delete the `instance/users.db` file and run the command again.*
+
+### 5. Run the Application
 
 With the virtual environment active and dependencies installed, run the main application file:
 

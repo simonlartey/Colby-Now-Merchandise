@@ -62,6 +62,7 @@ body {
         }
         .card-title a.card-link:hover {
             color: var(--colby-blue);
+        }
 
         .list-group-item h5 {
             margin-bottom: 0.25rem;
@@ -69,4 +70,3 @@ body {
         .list-group-item p {
             margin-bottom: 0.25rem;
         }
-}

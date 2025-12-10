@@ -12,10 +12,11 @@ from flask import (
 
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from .models import Item, db, User, Order
+from .models import Item, Order, User, RecentlyViewed, db
 import os
 from datetime import datetime
 from flask_mail import Message
+import stripe
 
 # Create a new blueprint for main pages
 main = Blueprint("main", __name__)
@@ -39,23 +40,40 @@ def home():
 
     if search:
         # User performed a search — show filtered results
-        results = Item.search(search).order_by(Item.created_at.desc()).limit(12).all()
+        results = (
+            Item.search(search)
+            .filter_by(is_active=True)
+            .order_by(Item.created_at.desc())
+            .limit(12)
+            .all()
+        )
+
         return render_template(
             "home.html",
             user=current_user,
-            category_items=[],  # Skip category display during search
-            recent_items=results,  # Reuse this section to show results
+            category_items=[],
+            recent_items=results,
             current_search=search,
         )
 
-    # Default homepage (no search)
-    categories = ["electronics", "clothing", "furniture"]
+    # Default homepage
+    categories = ["electronics", "clothing", "furniture", "books", "miscellaneous"]
+
     category_items = [
-        Item.query.filter_by(category=category).order_by(Item.created_at.desc()).first()
+        Item.query.filter_by(category=category, is_active=True)
+        .order_by(Item.created_at.desc())
+        .first()
         for category in categories
     ]
+
     category_items = [item for item in category_items if item]
-    recent_items = Item.query.order_by(Item.created_at.desc()).limit(6).all()
+
+    recent_items = (
+        Item.query.filter_by(is_active=True)
+        .order_by(Item.created_at.desc())
+        .limit(6)
+        .all()
+    )
 
     return render_template(
         "home.html",
@@ -75,7 +93,7 @@ def buy_item():
     search = request.args.get("search", type=str)
     sort_by = request.args.get("sort_by", default="newest", type=str)
 
-    query = Item.search(search)
+    query = Item.search(search).filter_by(is_active=True)
 
     if categories_selected:
         query = query.filter(Item.category.in_(categories_selected))
@@ -97,9 +115,15 @@ def buy_item():
 
     items = query.all()
 
-    categories = [c[0] for c in db.session.query(Item.category).distinct().all() if c[0]]
-    seller_types = [s[0] for s in db.session.query(Item.seller_type).distinct().all() if s[0]]
-    conditions = [c[0] for c in db.session.query(Item.condition).distinct().all() if c[0]]
+    categories = [
+        c[0] for c in db.session.query(Item.category).distinct().all() if c[0]
+    ]
+    seller_types = [
+        s[0] for s in db.session.query(Item.seller_type).distinct().all() if s[0]
+    ]
+    conditions = [
+        c[0] for c in db.session.query(Item.condition).distinct().all() if c[0]
+    ]
 
     return render_template(
         "buy_item.html",
@@ -114,7 +138,6 @@ def buy_item():
         current_sort=sort_by,
         item_count=len(items),
     )
-
 
 
 @main.route("/post-item", methods=["GET", "POST"])
@@ -205,10 +228,22 @@ def post_item():
 @main.route("/item/<int:item_id>")
 @login_required
 def item_details(item_id):
-    """
-    Displays detailed information about a specific item.
-    """
     item = Item.query.get_or_404(item_id)
+
+    # --- Recently Viewed (Upsert Logic) ---
+    if current_user.is_authenticated:
+        existing_view = RecentlyViewed.query.filter_by(
+            user_id=current_user.id, item_id=item.id
+        ).first()
+
+        if existing_view:
+            existing_view.viewed_at = datetime.utcnow()
+        else:
+            new_view = RecentlyViewed(user_id=current_user.id, item_id=item.id)
+            db.session.add(new_view)
+
+        db.session.commit()
+
     return render_template("item_details.html", item=item)
 
 
@@ -225,12 +260,20 @@ def seller_details(seller_id):
 @main.route("/my_listings")
 @login_required
 def my_listings():
-    """Display all items posted by the logged-in user."""
-    search = request.args.get("search", "")
-    query = Item.search(search).filter_by(seller_id=current_user.id)
+    search = request.args.get("search", "").strip()
+
+    # Filter items posted by current seller
+    query = Item.query.filter_by(seller_id=current_user.id)
+
+    # Apply multi-term search
+    if search:
+        search_terms = search.split()
+        for term in search_terms:
+            query = query.filter(Item.title.ilike(f"%{term}%"))
+
     items = query.all()
 
-    # NEW: Fetch incoming orders for items sold by this user
+    # Orders for this seller
     incoming_orders = (
         Order.query.join(Item)
         .filter(Item.seller_id == current_user.id)
@@ -238,15 +281,19 @@ def my_listings():
         .all()
     )
 
-    if not items and not incoming_orders:
-        flash("You haven’t posted any listings yet.", "info")
+    paid_orders = [o for o in incoming_orders if o.status == "paid_pending_pickup"]
+    pending_orders = [o for o in incoming_orders if o.status == "pending"]
+    approved_orders = [o for o in incoming_orders if o.status == "approved"]
+    completed_orders = [o for o in incoming_orders if o.status == "delivered"]
 
     return render_template(
         "my_listings.html",
         items=items,
-        user=current_user,
+        paid_orders=paid_orders,
+        pending_orders=pending_orders,
+        approved_orders=approved_orders,
+        completed_orders=completed_orders,
         current_search=search,
-        incoming_orders=incoming_orders,  # Pass to template
     )
 
 
@@ -355,46 +402,85 @@ def place_order(item_id):
 @login_required
 def create_order(item_id):
 
+    # Get form fields
+    location = request.form.get("location")
+    notes = request.form.get("notes")
+
+    # pickup date + time
+    pickup_date = request.form.get("pickup_date")  # ex: 2025-12-08
+    pickup_time = request.form.get("pickup_time")  # ex: 14:30
+
+    # Convert date + time to a single datetime
+    combined_pickup_time = None
+    if pickup_date and pickup_time:
+        try:
+            combined_pickup_time = datetime.strptime(
+                f"{pickup_date} {pickup_time}", "%Y-%m-%d %H:%M"
+            )
+        except ValueError:
+            flash("Invalid pickup date or time.", "danger")
+            return redirect(url_for("main.place_order", item_id=item_id))
+
+    # Create the order
     order = Order(
         buyer_id=current_user.id,
         item_id=item_id,
-        price_offer=request.form.get("price_offer"),
-        location=request.form.get("location"),
-        payment_method=request.form.get("payment_method"),
-        notes=request.form.get("notes"),
-        status="pending",
+        location=location,
+        notes=notes,
+        payment_method="stripe",
+        pickup_time=combined_pickup_time,
+        status="awaiting_payment",
     )
 
     db.session.add(order)
     db.session.commit()
 
-    print("Order status:", order.status)
-    print("Order id:", order.id)
+    # Redirect user to the payment page
+    return redirect(url_for("main.payment_page", order_id=order.id))
 
-    flash("Order successfully submitted! The seller will be notified.", "success")
-    return redirect(url_for("main.my_orders"))
+
+@main.route("/payment/<int:order_id>")
+@login_required
+def payment_page(order_id):
+    order = Order.query.get_or_404(order_id)
+
+    if order.buyer_id != current_user.id:
+        abort(403)
+
+    item = order.item
+
+    return render_template("payment.html", order=order, item=item)
 
 
 @main.route("/my_orders")
 @login_required
 def my_orders():
-    # Get orders for the current user
-    orders = (
-        Order.query.filter_by(buyer_id=current_user.id)
-        .order_by(Order.created_at.desc())
-        .all()
-    )
+    search = request.args.get("search", "").strip()
 
-    # Categorize orders by status
-    pending_orders = [o for o in orders if o.status == "pending"]
+    # Base query
+    query = Order.query.join(Item).filter(Order.buyer_id == current_user.id)
+
+    # Multi-word search
+    if search:
+        search_terms = search.split()
+        for term in search_terms:
+            query = query.filter(Item.title.ilike(f"%{term}%"))
+
+    orders = query.order_by(Order.created_at.desc()).all()
+
+    # Group orders
+    paid_pending_pickup_orders = [
+        o for o in orders if o.status == "paid_pending_pickup"
+    ]
     approved_orders = [o for o in orders if o.status == "approved"]
     delivered_orders = [o for o in orders if o.status == "delivered"]
 
     return render_template(
         "my_orders.html",
-        pending_orders=pending_orders,
+        paid_pending_pickup_orders=paid_pending_pickup_orders,
         approved_orders=approved_orders,
         delivered_orders=delivered_orders,
+        current_search=search,
     )
 
 
@@ -442,6 +528,38 @@ def remove_favorite(item_id):
     return redirect(request.referrer or url_for("main.favorites"))
 
 
+@main.route("/autocomplete")
+@login_required
+def autocomplete():
+    """
+    Returns JSON search suggestions for live autocomplete.
+    """
+    query = request.args.get("q", "").strip()
+
+    if not query:
+        return jsonify([])
+
+    # Get up to 8 matching items
+    items = (
+        Item.query.filter(Item.title.ilike(f"%{query}%"))
+        .order_by(Item.created_at.desc())
+        .limit(8)
+        .all()
+    )
+
+    results = []
+    for item in items:
+        image_url = (
+            url_for("static", filename=item.image_url)
+            if item.image_url
+            else url_for("static", filename="images/default_item.png")
+        )
+
+        results.append({"id": item.id, "title": item.title, "image": image_url})
+
+    return jsonify(results)
+
+
 @main.route("/contact_us", methods=["GET", "POST"])
 def contact_us():
     """
@@ -485,3 +603,207 @@ You have received a new message from the contact form:
 
     return render_template("contact_us.html")
 
+
+@main.route("/profile")
+@login_required
+def profile():
+    # Safe check for favorites
+    try:
+        favorites = (
+            current_user.favorites.all()
+            if hasattr(current_user.favorites, "all")
+            else list(current_user.favorites)
+        )
+    except:
+        favorites = []  # fallback until  favorites page is ready
+
+    # Orders placed by this user
+    orders = (
+        Order.query.filter_by(buyer_id=current_user.id)
+        .order_by(Order.created_at.desc())
+        .limit(5)  # show only the most recent 5
+        .all()
+    )
+
+    # Listings posted by this user
+    listings = Item.query.filter_by(seller_id=current_user.id).all()
+
+    # Convert item IDs -> real Item objects
+    # Recently Viewed Items (from relation)
+    recent_items = []
+    if current_user.is_authenticated:
+        views = (
+            current_user.viewed_history.order_by(RecentlyViewed.viewed_at.desc())
+            .limit(5)
+            .all()
+        )
+        recent_items = [v.item for v in views]
+
+    return render_template(
+        "profile.html",
+        user=current_user,
+        favorites=favorites,
+        orders=orders,
+        listings=listings,
+        recent_items=recent_items,
+    )
+
+
+@main.route("/update_profile", methods=["POST"])
+@login_required
+def update_profile():
+    first_name = request.form.get("first_name")
+    last_name = request.form.get("last_name")
+
+    current_user.first_name = first_name
+    current_user.last_name = last_name
+
+    image = request.files.get("profile_image")
+    if image and image.filename != "":
+        upload_path = os.path.join(current_app.static_folder, "profile_images")
+        os.makedirs(upload_path, exist_ok=True)
+
+        filename = f"{current_user.id}.png"
+        filepath = os.path.join(upload_path, filename)
+        image.save(filepath)
+
+        # Store RELATIVE path
+        current_user.profile_image = f"profile_images/{filename}"
+        print("DEBUG: Updating profile image to:", current_user.profile_image)
+
+    db.session.commit()
+    return redirect(url_for("main.profile"))
+
+
+@main.route("/start_checkout/<int:order_id>", methods=["POST"])
+@login_required
+def start_checkout(order_id):
+    # Initialize Stripe safely inside the request context
+    stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
+
+    order = Order.query.get_or_404(order_id)
+
+    # Only the buyer can pay
+    if order.buyer_id != current_user.id:
+        abort(403)
+
+    item = order.item
+
+    # Stripe requires amounts in CENTS
+    amount_cents = int(item.price * 100)
+
+    # Create Stripe Checkout Session
+    checkout_session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        mode="payment",
+        line_items=[
+            {
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {"name": item.title},
+                    "unit_amount": amount_cents,
+                },
+                "quantity": 1,
+            }
+        ],
+        metadata={
+            "order_id": order.id,
+            "item_id": item.id,
+            "buyer_id": current_user.id,
+        },
+        success_url=url_for("main.payment_success", order_id=order.id, _external=True),
+        cancel_url=url_for("main.payment_cancelled", order_id=order.id, _external=True),
+    )
+
+    # (Optional but recommended)
+    order.stripe_session_id = checkout_session.id
+    order.status = "processing_payment"
+    db.session.commit()
+
+    # Redirect user to Stripe
+    return redirect(checkout_session.url)
+
+
+@main.route("/payment_success/<int:order_id>")
+@login_required
+def payment_success(order_id):
+    order = Order.query.get_or_404(order_id)
+
+    # Ensure only the buyer can view this
+    if order.buyer_id != current_user.id:
+        abort(403)
+
+    # Prevent double-processing
+    if order.status == "paid_pending_pickup":
+        return render_template("payment_success.html", order=order, item=order.item)
+
+    # Update order status
+    order.status = "paid_pending_pickup"
+
+    # Hide item from Buy Item list
+    item = order.item
+    item.is_active = False
+
+    db.session.commit()
+
+    # Render the success UI
+    return render_template("payment_success.html", order=order, item=item)
+
+
+@main.route("/payment_cancelled/<int:order_id>")
+@login_required
+def payment_cancelled(order_id):
+    order = Order.query.get_or_404(order_id)
+
+    # Only buyer can view
+    if order.buyer_id != current_user.id:
+        abort(403)
+
+    flash("Payment was cancelled. No charges were made.", "warning")
+    return redirect(url_for("main.my_orders"))
+
+
+@main.route("/complete_order/<int:order_id>", methods=["POST"])
+@login_required
+def complete_order(order_id):
+    order = Order.query.get_or_404(order_id)
+
+    # Only seller allowed
+    if order.item.seller_id != current_user.id:
+        flash("You are not allowed to complete this order.", "danger")
+        return redirect(url_for("main.my_listings"))
+
+    # Final order status — unified for buyer & seller
+    order.status = "delivered"
+    order.completed_at = datetime.utcnow()
+
+    # Item should no longer be visible
+    order.item.is_active = False
+
+    db.session.commit()
+
+    flash("Order marked as delivered!", "success")
+    return redirect(url_for("main.my_listings"))
+
+
+@main.route("/approve_pickup/<int:order_id>", methods=["POST"])
+@login_required
+def approve_pickup(order_id):
+    order = Order.query.get_or_404(order_id)
+
+    # Security → only the seller of the item can approve
+    if order.item.seller_id != current_user.id:
+        flash("You are not allowed to approve this order.", "danger")
+        return redirect(url_for("main.my_listings"))
+
+    # Only allow approval for paid orders
+    if order.status != "paid_pending_pickup":
+        flash("This order cannot be approved.", "warning")
+        return redirect(url_for("main.my_listings"))
+
+    # Change state to approved
+    order.status = "approved"
+    db.session.commit()
+
+    flash("Pickup approved! The buyer can now pick up the item.", "success")
+    return redirect(url_for("main.my_listings"))

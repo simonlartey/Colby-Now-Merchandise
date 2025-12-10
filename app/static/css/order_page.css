@@ -1,0 +1,103 @@
+body {
+    background: #f5f7fa;
+    font-family: 'Inter', sans-serif;
+}
+
+.order-wrapper {
+    max-width: 720px;
+    margin: auto;
+}
+
+/* Card */
+.order-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 32px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Item Preview Card */
+.item-preview {
+    border: 1px solid #e6e6e6;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.item-preview img {
+    width: 84px;
+    height: 84px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.item-info h5 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.item-info p {
+    margin: 2px 0 0 0;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Input sections */
+.section-label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+}
+
+.icon-input {
+    position: relative;
+}
+
+.icon-input i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #777;
+    font-size: 18px;
+}
+
+.icon-input input,
+.icon-input textarea {
+    padding-left: 42px;
+    height: 48px;
+}
+
+.icon-input textarea {
+    padding-top: 14px;
+    height: auto;
+}
+
+/* Divider */
+.divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.06);
+    margin: 28px 0;
+}
+
+/* Premium Button */
+.btn-premium {
+    background: linear-gradient(90deg, #0066ff, #004de6);
+    border: none;
+    color: white;
+    padding: 14px;
+    width: 100%;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    box-shadow: 0 4px 18px rgba(0, 102, 255, 0.35);
+    transition: 0.2s ease-out;
+}
+
+.btn-premium:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}

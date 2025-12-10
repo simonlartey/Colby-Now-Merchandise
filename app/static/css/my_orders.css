@@ -1,0 +1,49 @@
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.order-card {
+    transition: transform 0.2s ease;
+}
+
+.order-card:hover {
+    transform: translateY(-2px);
+}
+
+.order-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+.status-badge {
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.orders-search .search-wrapper {
+    position: relative;
+    width: 350px;
+}
+
+.orders-search .search-input {
+    width: 100%;
+    border-radius: 12px;
+    padding-left: 2.2rem;
+    height: 44px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+.orders-search .search-icon {
+    position: absolute;
+    left: 12px;
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.orders-search button {
+    height: 44px;
+    border-radius: 22px !important;
+}

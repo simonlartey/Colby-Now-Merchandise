@@ -4,111 +4,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buy an Item - ColbyNow Merchandise</title>
+    <title>Place Your Order - ColbyNow Merchandise</title>
 
-    <!-- Load Google Font 'Inter' -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Load Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
-    <!-- Load Bootstrap Icons -->
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/buy_item.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/order_page.css') }}">
 
 </head>
 
-<body class="bg-light">
+<body>
 
     {% include "_navbar.html" %}
 
-    <!-- Main Content Area -->
-    <main class="container my-5">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show"
-            role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <main class="container my-5 order-wrapper">
+
+        <h1 class="fw-bold mb-2">Place Your Order</h1>
+        <p class="text-muted mb-4">Confirm pickup details and complete your secure payment.</p>
+
+        <div class="order-card">
+
+            <!-- ITEM PREVIEW CARD -->
+            <div class="item-preview">
+                <img src="{{ url_for('static', filename=item.image_url) }}" alt="Item Image">
+                <div class="item-info">
+                    <h5>{{ item.title }}</h5>
+                    <p>Seller: {{ item.seller.name }}</p>
+                    <p class="fw-semibold text-primary">${{ '%.2f'|format(item.price) }}</p>
+                </div>
+            </div>
+
+            <form action="{{ url_for('main.create_order', item_id=item.id) }}" method="POST">
+
+                <!-- PRICE (non-negotiable) -->
+                <div class="mb-4">
+                    <label class="section-label">Item Price</label>
+
+                    <div class="icon-input">
+                        <i class="bi bi-cash-stack"></i>
+                        <input type="text" class="form-control bg-light" value="${{ '%.2f'|format(item.price) }}"
+                            readonly>
+                    </div>
+
+                    <small class="text-muted">Fixed price • Non-negotiable</small>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- PICKUP LOCATION -->
+                <div class="mb-4">
+                    <label class="section-label">Pickup Location</label>
+
+                    <div class="icon-input">
+                        <i class="bi bi-geo-alt"></i>
+                        <input type="text" name="location" class="form-control"
+                            placeholder="E.g., Miller Steps, Bobs Parking Lot" required>
+                    </div>
+                </div>
+
+                <!-- PICKUP TIME -->
+                <div class="mb-4">
+                    <label class="section-label">Preferred Pickup Date & Time</label>
+
+                    <div class="row g-3">
+
+                        <!-- Date -->
+                        <div class="col-md-6">
+                            <div class="icon-input">
+                                <i class="bi bi-calendar-day"></i>
+                                <input type="date" name="pickup_date" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <!-- Time -->
+                        <div class="col-md-6">
+                            <div class="icon-input">
+                                <i class="bi bi-clock"></i>
+                                <input type="time" name="pickup_time" class="form-control" required>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- NOTES -->
+                <div class="mb-4">
+                    <label class="section-label">Notes for the Seller (optional)</label>
+
+                    <div class="icon-input">
+                        <i class="bi bi-chat-dots"></i>
+                        <textarea name="notes" class="form-control" rows="3"
+                            placeholder="Add timing preferences, details, etc."></textarea>
+                    </div>
+                </div>
+
+                <!-- ✨ SECURE PAYMENT SUMMARY (FIX #5) -->
+                <div class="mb-4 p-3 rounded" style="background:#f0f4ff; border:1px solid #d6e4ff;">
+
+                    <h6 class="fw-bold mb-2">
+                        <i class="bi bi-shield-check text-primary"></i> Secure Payment Summary
+                    </h6>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Item Price</span>
+                        <span class="fw-semibold">${{ '%.2f'|format(item.price) }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Service Fee</span>
+                        <span class="fw-semibold">$0.00</span>
+                    </div>
+
+                    <hr class="my-2">
+
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold">Total Due</span>
+                        <span class="fw-bold text-primary">
+                            ${{ '%.2f'|format(item.price) }}
+                        </span>
+                    </div>
+
+                    <p class="mt-2 text-muted small">
+                        Payments are processed securely through Stripe.
+                        Funds are held safely until pickup is completed.
+                        The seller cannot cancel after payment is made.
+                    </p>
+                </div>
+
+                <!-- SUBMIT BUTTON -->
+                <button type="submit" class="btn-premium w-100">
+                    Pay & Request Pickup
+                </button>
+
+            </form>
+
         </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-        <h1 class="display-5 fw-bold">Place Your Order</h1>
-        <p class="text-muted fs-5">Set your pickup method, payment option, and notes for the seller.</p>
 
-        <!-- Order Form -->
-        <form action="{{ url_for('main.create_order', item_id=item.id) }}" method="POST"
-            class="bg-white p-4 rounded shadow-sm">
-
-            <!-- Price offer -->
-            <div class="mb-3 p-4 pb-4">
-                <label for="price_offer" class="form-label fw-semibold">What price are you willing to pay?</label>
-                <input type="number" class="form-control" id="price_offer" name="price_offer"
-                    placeholder="Enter your offer (USD)" required>
-                <small class="text-muted">If the item is negotiable, suggest your price.</small>
-            </div>
-
-            <!-- Pickup location -->
-            <div class="mb-3 p-3">
-                <label for="location" class="form-label fw-semibold">Preferred location to meet</label>
-                <input type="text" class="form-control" id="location" name="location"
-                    placeholder="E.g., Miller steps, Bobs parking lot…" required>
-            </div>
-
-            <!-- Payment options -->
-            <div class="mb-3 p-3">
-                <label class="form-label fw-semibold">How will you pay?</label>
-
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="payment_method" id="pay_self" value="self"
-                        required>
-                    <label class="form-check-label" for="pay_self">
-                        Paying for it myself (suggestions: cash, Venmo, Zelle, Paypal etc.)
-                    </label>
-                </div>
-
-                <div class="form-check mt-1">
-                    <input class="form-check-input" type="radio" name="payment_method" id="pay_platform"
-                        value="platform" disabled>
-                    <label class="form-check-label" for="pay_platform">
-                        Pay using the platform’s integrated payment feature (not applicable now - comming soon feature)
-                    </label>
-                </div>
-            </div>
-
-            <!-- Additional notes -->
-            <div class="mb-3 p-3">
-                <label for="notes" class="form-label fw-semibold">Any additional notes for the seller?</label>
-                <textarea class="form-control" id="notes" name="notes" rows="3"
-                    placeholder="E.g., I’m only free after 6 PM, please bring change…"></textarea>
-            </div>
-
-            <!-- Submit -->
-            <button class="btn btn-primary w-100 py-2 fw-semibold" type="submit">Place Order</button>
-
-        </form>
+        <p class="text-center text-muted small mt-4">
+            COPYRIGHTS COLBY.EDU. ALL RIGHTS RESERVED
+        </p>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="border-top mt-5">
-        <div class="container py-4">
-            <p class="text-center text-muted small">
-                COPYRIGHTS COLBY.EDU. ALL RIGHTS RESERVED
-            </p>
-        </div>
-    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Load Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
-    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 </body>
 
 </html>

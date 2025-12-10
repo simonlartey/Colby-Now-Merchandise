@@ -190,3 +190,24 @@ body {
     font-size: 0.9rem;
   }
 }
+
+
+.listings-search .input-group-text {
+    border-radius: 20px 0 0 20px !important;
+    border-right: none;
+    background-color: #fff;
+}
+
+.listings-search .form-control {
+    border-left: none;
+    border-radius: 0 !important;
+    height: 38px;
+    font-size: 0.9rem;
+}
+
+.listings-search .btn {
+    border-radius: 0 20px 20px 0 !important;
+    height: 38px;
+    padding: 0 18px;
+    font-size: 0.9rem;
+}
