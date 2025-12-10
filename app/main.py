@@ -19,6 +19,13 @@ main = Blueprint("main", __name__)
 
 
 @main.route("/")
+def landing():
+    """
+    Displays the landing page (dashboard).
+    """
+    return render_template("landing.html")
+
+@main.route("/home")
 @login_required
 def home():
     """
@@ -373,3 +380,4 @@ You have received a new message from the contact form:
         return redirect(url_for("main.contact_us"))
 
     return render_template("contact_us.html")
+
