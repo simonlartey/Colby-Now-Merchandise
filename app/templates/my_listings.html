@@ -2,175 +2,263 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Listings - ColbyNow Merchandise</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Listings - ColbyNow Merchandise</title>
 
-  <!-- Bootstrap + Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-
-  <!-- Fonts & Styles -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/my_listings.css') }}" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/my_listings.css') }}">
 </head>
 
 <body class="bg-light" style="font-family: 'Inter', sans-serif;">
 
-  {% include "_navbar.html" %}
+    {% include "_navbar.html" %}
 
-  <!-- ===== HERO SECTION ===== -->
-  <section class="listing-hero container mt-4 mb-5 py-5 text-center shadow-sm rounded-4">
-    <h1 class="fw-bold mb-3">My Listings</h1>
-    <p class="lead text-white-75">
-      Manage, edit, or delete the items you’ve posted on <strong>ColbyNow Merchandise</strong>.
-    </p>
-  </section>
+    <!-- ===== HERO ===== -->
+    <section class="listing-hero container mt-4 mb-5 py-5 text-center shadow-sm rounded-4">
+        <h1 class="fw-bold mb-3">My Listings</h1>
+        <p class="lead text-white-75">
+            Manage your posted items and respond to buyer requests.
+        </p>
+    </section>
 
+    <main class="container py-4">
 
+        <!-- ============================= -->
+        <!-- PENDING REQUESTS -->
+        <!-- ============================= -->
+        {% if pending_orders %}
+        <div class="mb-5">
+            <h3 class="fw-bold mb-3">Pending Requests</h3>
 
-  <!-- ===== INCOMING REQUESTS (Grouped by Status) ===== -->
-  <main class="container py-4">
+            <div class="row g-3">
+                {% for order in pending_orders %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm border-0 p-3">
 
-    <!-- PAID ORDERS — MOST IMPORTANT -->
-    {% if paid_orders %}
-    <div class="mb-5">
-      <h3 class="fw-bold mb-3 text-primary">Paid Orders — Awaiting Pickup</h3>
+                        <img src="{{ url_for('static', filename=order.item.image_url) }}"
+                             class="rounded mb-3"
+                             style="height:180px; object-fit:cover; width:100%;">
 
-      <div class="row g-3">
-        {% for order in paid_orders %}
-        {% include "_order_card.html" %}
-        {% endfor %}
-      </div>
-    </div>
-    <hr class="my-5">
-    {% endif %}
+                        <h5 class="fw-bold">{{ order.item.title }}</h5>
+                        <p class="text-muted small mb-1">
+                            Buyer: <strong>{{ order.buyer.name }}</strong>
+                        </p>
+                        <p class="text-muted small">
+                            Pickup: {{ order.location }}  
+                            {% if order.pickup_time %}
+                                • {{ order.pickup_time }}
+                            {% endif %}
+                        </p>
 
-    <!-- PENDING ORDERS -->
-    {% if pending_orders %}
-    <div class="mb-5">
-      <h3 class="fw-bold mb-3">Pending Requests (Awaiting Approval)</h3>
+                        {% if order.notes %}
+                        <p class="fst-italic small text-muted">
+                            "{{ order.notes }}"
+                        </p>
+                        {% endif %}
 
-      <div class="row g-3">
-        {% for order in pending_orders %}
-        {% include "_order_card.html" %}
-        {% endfor %}
-      </div>
-    </div>
-    <hr class="my-5">
-    {% endif %}
+                        {% if current_user.id == order.item.seller_id %}
+                        <div class="d-flex gap-2 mt-3">
+                            <form action="{{ url_for('main.approve_pickup', order_id=order.id) }}" method="POST" class="w-50">
+                                <button class="btn btn-success w-100">
+                                    Approve
+                                </button>
+                            </form>
 
-    <!-- APPROVED ORDERS -->
-    {% if approved_orders %}
-    <div class="mb-5">
-      <h3 class="fw-bold mb-3 text-success">Approved Orders</h3>
+                            <form action="{{ url_for('main.handle_order', order_id=order.id, action='reject') }}" method="POST" class="w-50">
+                                <button class="btn btn-outline-danger w-100">
+                                    Cancel
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
 
-      <div class="row g-3">
-        {% for order in approved_orders %}
-        {% include "_order_card.html" %}
-        {% endfor %}
-      </div>
-    </div>
-    <hr class="my-5">
-    {% endif %}
-
-    <!-- COMPLETED ORDERS -->
-    {% if completed_orders %}
-    <div class="mb-5">
-      <h3 class="fw-bold mb-3 text-muted">Completed Orders</h3>
-
-      <div class="row g-3">
-        {% for order in completed_orders %}
-        {% include "_order_card.html" %}
-        {% endfor %}
-      </div>
-    </div>
-    <hr class="my-5">
-    {% endif %}
-
-
-    <!-- ===== MAIN LISTINGS ===== -->
-    <div id="items-section" class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-
-      <h3 class="fw-bold mb-0">Your Items</h3>
-
-      <form method="GET" action="{{ url_for('main.my_listings') }}#items-section"
-        class="d-flex align-items-center gap-2 mt-3 mt-md-0">
-
-        <div class="position-relative" style="width: 300px;">
-          <i class="bi bi-search position-absolute"
-            style="left: 12px; top: 50%; transform: translateY(-50%); color: #555;"></i>
-
-          <input type="text" name="search" class="form-control ps-5" placeholder="Search your listings..."
-            value="{{ current_search or '' }}"
-            oninput="if(this.value === '') window.location='{{ url_for('main.my_listings') }}#items-section';">
-        </div>
-
-        <button type="submit" class="btn btn-dark px-4 rounded-pill fw-semibold">
-          Search
-        </button>
-
-      </form>
-
-    </div>
-
-
-    {% if items %}
-    <div class="row g-4">
-      {% for item in items %}
-      <div class="col-md-6 col-lg-4">
-        <div class="card listing-card border-0 shadow-sm h-100">
-
-          {% if item.image_url %}
-          <img src="{{ url_for('static', filename=item.image_url) }}" class="card-img-top rounded-top-4"
-            alt="{{ item.title }}" />
-          {% else %}
-          <div class="bg-light d-flex justify-content-center align-items-center rounded-top-4" style="height:200px;">
-            <i class="bi bi-image text-muted fs-1"></i>
-          </div>
-          {% endif %}
-
-          <div class="card-body d-flex flex-column p-4">
-            <h5 class="card-title fw-semibold text-dark mb-2">{{ item.title }}</h5>
-            <p class="card-text text-muted small flex-grow-1 mb-3">
-              {{ item.description[:90] }}{% if item.description|length > 90 %}...{% endif %}
-            </p>
-            <p class="price-tag mb-3">${{ "%.2f"|format(item.price) }}</p>
-
-            <div class="d-flex justify-content-between align-items-center mt-auto">
-              <a href="{{ url_for('main.item_details', item_id=item.id) }}"
-                class="btn btn-outline-primary btn-sm btn-action px-3">
-                <i class="bi bi-eye"></i> View
-              </a>
-              <a href="{{ url_for('main.edit_item', item_id=item.id) }}" class="btn btn-warning btn-sm btn-action px-3">
-                <i class="bi bi-pencil"></i> Edit
-              </a>
-              <form action="{{ url_for('main.delete_item', item_id=item.id) }}" method="POST" style="display:inline;">
-                <button type="submit" class="btn btn-danger btn-sm btn-action px-3"
-                  onclick="return confirm('Delete this listing?');">
-                  <i class="bi bi-trash"></i> Delete
-                </button>
-              </form>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-          </div>
         </div>
-      </div>
-      {% endfor %}
-    </div>
-    {% else %}
-    <div class="empty-state text-center py-5">
-      <i class="bi bi-box-seam mb-3"></i>
-      <h4 class="fw-semibold">You haven’t posted any items yet</h4>
-      <p class="text-muted">Once you post items for sale, they’ll appear here.</p>
-      <a href="{{ url_for('main.post_item') }}" class="btn btn-primary btn-action mt-3 px-4">
-        Post a New Item
-      </a>
-    </div>
-    {% endif %}
-  </main>
+        <hr class="my-5">
+        {% endif %}
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- ============================= -->
+        <!-- APPROVED REQUESTS -->
+        <!-- ============================= -->
+        {% if approved_orders %}
+        <div class="mb-5">
+            <h3 class="fw-bold mb-3 text-success">Approved Requests</h3>
+
+            <div class="row g-3">
+                {% for order in approved_orders %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm border-0 p-3">
+
+                        <img src="{{ url_for('static', filename=order.item.image_url) }}"
+                             class="rounded mb-3"
+                             style="height:180px; object-fit:cover; width:100%;">
+
+                        <h5 class="fw-bold">{{ order.item.title }}</h5>
+
+                        <p class="text-muted small">
+                            Buyer: <strong>{{ order.buyer.name }}</strong>
+                        </p>
+
+                        <p class="text-muted small">
+                            Pickup: {{ order.location }}
+                            {% if order.pickup_time %}
+                                • {{ order.pickup_time }}
+                            {% endif %}
+                        </p>
+
+                        {% if current_user.id == order.item.seller_id %}
+                        <button class="btn btn-outline-success w-100 mt-2"
+                                onclick="markAsSold({{ order.id }})">
+                            Mark as Sold
+                        </button>
+                        {% endif %}
+
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+        <hr class="my-5">
+        {% endif %}
+
+        <!-- ============================= -->
+        <!-- COMPLETED ORDERS -->
+        <!-- ============================= -->
+        {% if completed_orders %}
+        <div class="mb-5">
+            <h3 class="fw-bold mb-3 text-muted">Completed Orders</h3>
+
+            <div class="row g-3">
+                {% for order in completed_orders %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm border-0 p-3 opacity-75">
+
+                        <h5 class="fw-bold text-secondary">{{ order.item.title }}</h5>
+
+                        <p class="small text-muted mb-0">
+                            Completed on {{ order.created_at.strftime("%b %d, %Y") }}
+                        </p>
+
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <hr class="my-5">
+        {% endif %}
+
+        <!-- ============================= -->
+        <!-- USER LISTINGS -->
+        <!-- ============================= -->
+        <div id="items-section"
+             class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+
+            <h3 class="fw-bold mb-0">Your Items</h3>
+
+            <form method="GET" action="{{ url_for('main.my_listings') }}#items-section"
+                  class="d-flex align-items-center gap-2 mt-3 mt-md-0">
+
+                <div class="position-relative" style="width: 300px;">
+                    <i class="bi bi-search position-absolute"
+                       style="left:12px; top:50%; transform:translateY(-50%); color:#555;"></i>
+
+                    <input type="text" name="search" class="form-control ps-5"
+                           placeholder="Search your listings..."
+                           value="{{ current_search or '' }}"
+                           oninput="if(this.value === '') window.location='{{ url_for('main.my_listings') }}#items-section';">
+                </div>
+
+                <button type="submit" class="btn btn-dark px-4 rounded-pill fw-semibold">
+                    Search
+                </button>
+            </form>
+
+        </div>
+
+        {% if items %}
+        <div class="row g-4">
+            {% for item in items %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card listing-card border-0 shadow-sm h-100">
+
+                    {% if item.image_url %}
+                    <img src="{{ url_for('static', filename=item.image_url) }}"
+                         class="card-img-top rounded-top-4"
+                         alt="{{ item.title }}">
+                    {% else %}
+                    <div class="bg-light d-flex justify-content-center align-items-center rounded-top-4"
+                         style="height:200px;">
+                        <i class="bi bi-image text-muted fs-1"></i>
+                    </div>
+                    {% endif %}
+
+                    <div class="card-body d-flex flex-column p-4">
+                        <h5 class="card-title fw-semibold text-dark mb-2">{{ item.title }}</h5>
+
+                        <p class="card-text text-muted small flex-grow-1 mb-3">
+                            {{ item.description[:90] }}{% if item.description|length > 90 %}...{% endif %}
+                        </p>
+
+                        <p class="price-tag mb-3">${{ "%.2f"|format(item.price) }}</p>
+
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                            <a href="{{ url_for('main.item_details', item_id=item.id) }}"
+                               class="btn btn-outline-primary btn-sm px-3">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+
+                            <a href="{{ url_for('main.edit_item', item_id=item.id) }}"
+                               class="btn btn-warning btn-sm px-3">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+
+                            <form action="{{ url_for('main.delete_item', item_id=item.id) }}"
+                                  method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm px-3"
+                                        onclick="return confirm('Delete this listing?');">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="empty-state text-center py-5">
+            <i class="bi bi-box-seam mb-3"></i>
+            <h4 class="fw-semibold">You haven’t posted any items yet</h4>
+            <p class="text-muted">Your posted items will appear here.</p>
+            <a href="{{ url_for('main.post_item') }}" class="btn btn-primary px-4">
+                Post a New Item
+            </a>
+        </div>
+        {% endif %}
+
+    </main>
+
+    <script>
+        function markAsSold(orderId) {
+            fetch(`/mark_sold/${orderId}`, { method: "POST" })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) location.reload();
+                });
+        }
+    </script>
+
 </body>
 
 </html>

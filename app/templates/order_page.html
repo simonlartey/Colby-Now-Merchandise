@@ -24,123 +24,94 @@
 
     <main class="container my-5 order-wrapper">
 
-        <h1 class="fw-bold mb-2">Place Your Order</h1>
-        <p class="text-muted mb-4">Confirm pickup details and complete your secure payment.</p>
+        <!-- INFO BANNER -->
+        <div class="alert alert-primary d-flex align-items-center shadow-sm mb-4" 
+             style="background:#eef4ff; border-color:#cddcff;">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            <span>This is an offline transaction — payment is made directly to the seller at pickup.</span>
+        </div>
 
-        <div class="order-card">
+        <h1 class="fw-bold mb-2">Place Your Order</h1>
+        <p class="text-muted mb-4">Provide pickup details. The seller must approve before meeting.</p>
+
+        <div class="order-card shadow-sm">
 
             <!-- ITEM PREVIEW CARD -->
-            <div class="item-preview">
-                <img src="{{ url_for('static', filename=item.image_url) }}" alt="Item Image">
+            <div class="item-preview border-bottom pb-3 mb-4 d-flex gap-3 align-items-center">
+                <img src="{{ url_for('static', filename=item.image_url) }}" 
+                     alt="Item Image"
+                     class="rounded"
+                     style="width:110px; height:110px; object-fit:cover;">
+
                 <div class="item-info">
-                    <h5>{{ item.title }}</h5>
-                    <p>Seller: {{ item.seller.name }}</p>
-                    <p class="fw-semibold text-primary">${{ '%.2f'|format(item.price) }}</p>
+                    <h5 class="mb-1">{{ item.title }}</h5>
+                    <p class="text-muted mb-1">
+                        <i class="bi bi-person"></i> Seller: {{ item.seller.name }}
+                    </p>
+                    <p class="fw-bold fs-5 text-primary mb-0">
+                        ${{ '%.2f'|format(item.price) }}
+                    </p>
                 </div>
             </div>
 
             <form action="{{ url_for('main.create_order', item_id=item.id) }}" method="POST">
 
-                <!-- PRICE (non-negotiable) -->
+                <!-- PRICE -->
                 <div class="mb-4">
-                    <label class="section-label">Item Price</label>
-
+                    <label class="section-label fw-semibold">Item Price</label>
                     <div class="icon-input">
                         <i class="bi bi-cash-stack"></i>
-                        <input type="text" class="form-control bg-light" value="${{ '%.2f'|format(item.price) }}"
+                        <input 
+                            type="text" 
+                            class="form-control bg-light fw-semibold" 
+                            value="${{ '%.2f'|format(item.price) }}" 
                             readonly>
                     </div>
-
-                    <small class="text-muted">Fixed price • Non-negotiable</small>
+                    <small class="text-muted">Price shown is final. No online payment required.</small>
                 </div>
-
-                <div class="divider"></div>
 
                 <!-- PICKUP LOCATION -->
                 <div class="mb-4">
-                    <label class="section-label">Pickup Location</label>
-
+                    <label class="section-label fw-semibold">Pickup Location</label>
                     <div class="icon-input">
                         <i class="bi bi-geo-alt"></i>
                         <input type="text" name="location" class="form-control"
-                            placeholder="E.g., Miller Steps, Bobs Parking Lot" required>
+                               placeholder="Ex: Miller Steps, Bobs Parking Lot, Davis Lobby" required>
                     </div>
                 </div>
 
-                <!-- PICKUP TIME -->
+                <!-- PICKUP DATE + TIME -->
                 <div class="mb-4">
-                    <label class="section-label">Preferred Pickup Date & Time</label>
-
+                    <label class="section-label fw-semibold">Preferred Pickup Date & Time</label>
                     <div class="row g-3">
-
-                        <!-- Date -->
                         <div class="col-md-6">
                             <div class="icon-input">
                                 <i class="bi bi-calendar-day"></i>
                                 <input type="date" name="pickup_date" class="form-control" required>
                             </div>
                         </div>
-
-                        <!-- Time -->
                         <div class="col-md-6">
                             <div class="icon-input">
                                 <i class="bi bi-clock"></i>
                                 <input type="time" name="pickup_time" class="form-control" required>
                             </div>
                         </div>
-
                     </div>
                 </div>
-
-                <div class="divider"></div>
 
                 <!-- NOTES -->
                 <div class="mb-4">
-                    <label class="section-label">Notes for the Seller (optional)</label>
-
+                    <label class="section-label fw-semibold">Notes for the Seller (optional)</label>
                     <div class="icon-input">
                         <i class="bi bi-chat-dots"></i>
                         <textarea name="notes" class="form-control" rows="3"
-                            placeholder="Add timing preferences, details, etc."></textarea>
+                                  placeholder="Add timing preferences or special instructions"></textarea>
                     </div>
                 </div>
 
-                <!-- ✨ SECURE PAYMENT SUMMARY (FIX #5) -->
-                <div class="mb-4 p-3 rounded" style="background:#f0f4ff; border:1px solid #d6e4ff;">
-
-                    <h6 class="fw-bold mb-2">
-                        <i class="bi bi-shield-check text-primary"></i> Secure Payment Summary
-                    </h6>
-
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Item Price</span>
-                        <span class="fw-semibold">${{ '%.2f'|format(item.price) }}</span>
-                    </div>
-
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Service Fee</span>
-                        <span class="fw-semibold">$0.00</span>
-                    </div>
-
-                    <hr class="my-2">
-
-                    <div class="d-flex justify-content-between">
-                        <span class="fw-bold">Total Due</span>
-                        <span class="fw-bold text-primary">
-                            ${{ '%.2f'|format(item.price) }}
-                        </span>
-                    </div>
-
-                    <p class="mt-2 text-muted small">
-                        Payments are processed securely through Stripe.
-                        Funds are held safely until pickup is completed.
-                        The seller cannot cancel after payment is made.
-                    </p>
-                </div>
-
-                <!-- SUBMIT BUTTON -->
-                <button type="submit" class="btn-premium w-100">
-                    Pay & Request Pickup
+                <!-- SUBMIT -->
+                <button type="submit" class="btn-premium w-100 py-2 fs-6 fw-semibold">
+                    Send Order Request
                 </button>
 
             </form>

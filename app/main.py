@@ -19,7 +19,6 @@ from .search_utils import generate_embedding
 import os
 from datetime import datetime
 from flask_mail import Message
-import stripe
 
 # Create a new blueprint for main pages
 main = Blueprint("main", __name__)
@@ -268,6 +267,7 @@ def seller_details(seller_id):
 @main.route("/my_listings")
 @login_required
 def my_listings():
+
     search = request.args.get("search", "").strip()
 
     # Filter items posted by current seller
@@ -289,18 +289,18 @@ def my_listings():
         .all()
     )
 
-    paid_orders = [o for o in incoming_orders if o.status == "paid_pending_pickup"]
     pending_orders = [o for o in incoming_orders if o.status == "pending"]
     approved_orders = [o for o in incoming_orders if o.status == "approved"]
-    completed_orders = [o for o in incoming_orders if o.status == "delivered"]
+    completed_orders = [o for o in incoming_orders if o.status == "completed"]
+    cancelled_orders = [o for o in incoming_orders if o.status == "cancelled"]
 
     return render_template(
         "my_listings.html",
         items=items,
-        paid_orders=paid_orders,
         pending_orders=pending_orders,
         approved_orders=approved_orders,
         completed_orders=completed_orders,
+        cancelled_orders=cancelled_orders,
         current_search=search,
     )
 
@@ -418,8 +418,8 @@ def create_order(item_id):
     notes = request.form.get("notes")
 
     # pickup date + time
-    pickup_date = request.form.get("pickup_date")  # ex: 2025-12-08
-    pickup_time = request.form.get("pickup_time")  # ex: 14:30
+    pickup_date = request.form.get("pickup_date")  
+    pickup_time = request.form.get("pickup_time")  
 
     # Convert date + time to a single datetime
     combined_pickup_time = None
@@ -438,29 +438,16 @@ def create_order(item_id):
         item_id=item_id,
         location=location,
         notes=notes,
-        payment_method="stripe",
         pickup_time=combined_pickup_time,
-        status="awaiting_payment",
+        status="pending",
     )
 
     db.session.add(order)
     db.session.commit()
 
-    # Redirect user to the payment page
-    return redirect(url_for("main.payment_page", order_id=order.id))
+    flash("Order request sent to seller!", "success")
+    return redirect(url_for("main.my_orders"))
 
-
-@main.route("/payment/<int:order_id>")
-@login_required
-def payment_page(order_id):
-    order = Order.query.get_or_404(order_id)
-
-    if order.buyer_id != current_user.id:
-        abort(403)
-
-    item = order.item
-
-    return render_template("payment.html", order=order, item=item)
 
 
 @main.route("/my_orders")
@@ -480,17 +467,19 @@ def my_orders():
     orders = query.order_by(Order.created_at.desc()).all()
 
     # Group orders
-    paid_pending_pickup_orders = [
-        o for o in orders if o.status == "paid_pending_pickup"
-    ]
+    pending_orders = [o for o in orders if o.status == "pending"]
     approved_orders = [o for o in orders if o.status == "approved"]
-    delivered_orders = [o for o in orders if o.status == "delivered"]
+    completed_orders = [o for o in orders if o.status == "completed"]
+    cancelled_orders = [o for o in orders if o.status == "cancelled"]
+
+
 
     return render_template(
         "my_orders.html",
-        paid_pending_pickup_orders=paid_pending_pickup_orders,
+        pending_orders=pending_orders,
         approved_orders=approved_orders,
-        delivered_orders=delivered_orders,
+        completed_orders=completed_orders,
+        cancelled_orders=cancelled_orders,
         current_search=search,
     )
 
@@ -501,10 +490,9 @@ def confirm_order(order_id):
     order = Order.query.get_or_404(order_id)
     if order.buyer_id != current_user.id:
         abort(403)
-    order.status = "delivered"
+    order.status = "completed"
     db.session.commit()
     return jsonify({"success": True})
-
 
 @main.route("/favorites")
 @login_required
@@ -515,6 +503,7 @@ def favorites():
         else list(current_user.favorites)
     )
     return render_template("favorites.html", favorites=fav_items)
+
 
 
 @main.route("/favorites/add/<int:item_id>", methods=["POST"])
@@ -708,7 +697,7 @@ def profile():
             else list(current_user.favorites)
         )
     except:
-        favorites = []  # fallback until  favorites page is ready
+        favorites = []  
 
     # Orders placed by this user
     orders = (
@@ -768,116 +757,6 @@ def update_profile():
     return redirect(url_for("main.profile"))
 
 
-@main.route("/start_checkout/<int:order_id>", methods=["POST"])
-@login_required
-def start_checkout(order_id):
-    # Initialize Stripe safely inside the request context
-    stripe.api_key = current_app.config["STRIPE_SECRET_KEY"]
-
-    order = Order.query.get_or_404(order_id)
-
-    # Only the buyer can pay
-    if order.buyer_id != current_user.id:
-        abort(403)
-
-    item = order.item
-
-    # Stripe requires amounts in CENTS
-    amount_cents = int(item.price * 100)
-
-    # Create Stripe Checkout Session
-    checkout_session = stripe.checkout.Session.create(
-        payment_method_types=["card"],
-        mode="payment",
-        line_items=[
-            {
-                "price_data": {
-                    "currency": "usd",
-                    "product_data": {"name": item.title},
-                    "unit_amount": amount_cents,
-                },
-                "quantity": 1,
-            }
-        ],
-        metadata={
-            "order_id": order.id,
-            "item_id": item.id,
-            "buyer_id": current_user.id,
-        },
-        success_url=url_for("main.payment_success", order_id=order.id, _external=True),
-        cancel_url=url_for("main.payment_cancelled", order_id=order.id, _external=True),
-    )
-
-    # (Optional but recommended)
-    order.stripe_session_id = checkout_session.id
-    order.status = "processing_payment"
-    db.session.commit()
-
-    # Redirect user to Stripe
-    return redirect(checkout_session.url)
-
-
-@main.route("/payment_success/<int:order_id>")
-@login_required
-def payment_success(order_id):
-    order = Order.query.get_or_404(order_id)
-
-    # Ensure only the buyer can view this
-    if order.buyer_id != current_user.id:
-        abort(403)
-
-    # Prevent double-processing
-    if order.status == "paid_pending_pickup":
-        return render_template("payment_success.html", order=order, item=order.item)
-
-    # Update order status
-    order.status = "paid_pending_pickup"
-
-    # Hide item from Buy Item list
-    item = order.item
-    item.is_active = False
-
-    db.session.commit()
-
-    # Render the success UI
-    return render_template("payment_success.html", order=order, item=item)
-
-
-@main.route("/payment_cancelled/<int:order_id>")
-@login_required
-def payment_cancelled(order_id):
-    order = Order.query.get_or_404(order_id)
-
-    # Only buyer can view
-    if order.buyer_id != current_user.id:
-        abort(403)
-
-    flash("Payment was cancelled. No charges were made.", "warning")
-    return redirect(url_for("main.my_orders"))
-
-
-@main.route("/complete_order/<int:order_id>", methods=["POST"])
-@login_required
-def complete_order(order_id):
-    order = Order.query.get_or_404(order_id)
-
-    # Only seller allowed
-    if order.item.seller_id != current_user.id:
-        flash("You are not allowed to complete this order.", "danger")
-        return redirect(url_for("main.my_listings"))
-
-    # Final order status — unified for buyer & seller
-    order.status = "delivered"
-    order.completed_at = datetime.utcnow()
-
-    # Item should no longer be visible
-    order.item.is_active = False
-
-    db.session.commit()
-
-    flash("Order marked as delivered!", "success")
-    return redirect(url_for("main.my_listings"))
-
 
 @main.route("/approve_pickup/<int:order_id>", methods=["POST"])
 @login_required
@@ -889,14 +768,35 @@ def approve_pickup(order_id):
         flash("You are not allowed to approve this order.", "danger")
         return redirect(url_for("main.my_listings"))
 
-    # Only allow approval for paid orders
-    if order.status != "paid_pending_pickup":
+    if order.status != "pending":
         flash("This order cannot be approved.", "warning")
         return redirect(url_for("main.my_listings"))
 
+
     # Change state to approved
     order.status = "approved"
+    order.item.is_active = False
     db.session.commit()
 
     flash("Pickup approved! The buyer can now pick up the item.", "success")
     return redirect(url_for("main.my_listings"))
+
+
+
+@main.route("/mark_sold/<int:order_id>", methods=["POST"])
+@login_required
+def mark_sold(order_id):
+    order = Order.query.get_or_404(order_id)
+
+    # Only seller can mark as sold
+    if order.item.seller_id != current_user.id:
+        abort(403)
+
+    # Only approved orders can be marked as sold
+    if order.status != "approved":
+        return jsonify({"success": False, "message": "Order cannot be marked as sold."})
+
+    order.status = "completed"
+    db.session.commit()
+
+    return jsonify({"success": True})

@@ -6,20 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Orders - ColbyNow Merchandise</title>
 
-    <!-- Load Google Font 'Inter' -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Load Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Load Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/my_orders.css') }}">
-
-
 </head>
 
 <body class="bg-light">
@@ -27,61 +17,51 @@
     {% include "_navbar.html" %}
 
     <div class="container my-5">
-        <div class="text-center mb-5">
-            <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
 
-                <div>
-                    <h1 class="display-6 fw-bold text-dark mb-0">My Orders</h1>
-                    <p class="text-muted mb-0 mt-1">Track the status of your purchases and pickups.</p>
-                </div>
-
-                <form method="GET" action="{{ url_for('main.my_orders') }}"
-                    class="orders-search d-flex align-items-center gap-2 mt-3 mt-md-0">
-
-                    <div class="search-wrapper d-flex align-items-center">
-                        <i class="bi bi-search search-icon"></i>
-                        <input type="text" name="search" class="search-input form-control"
-                            placeholder="Search all orders" value="{{ request.args.get('search', '') }}"
-                            oninput="if(this.value === '') window.location='{{ url_for('main.my_orders') }}';">
-                    </div>
-
-                    <button type="submit" class="btn btn-dark px-4 rounded-pill fw-semibold">
-                        Search Orders
-                    </button>
-
-                </form>
-
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-5">
+            <div>
+                <h1 class="display-6 fw-bold text-dark mb-0">My Orders</h1>
+                <p class="text-muted mb-0 mt-1">Track your item requests.</p>
             </div>
 
+            <form method="GET" action="{{ url_for('main.my_orders') }}"
+                class="orders-search d-flex align-items-center gap-2 mt-3 mt-md-0">
+
+                <div class="search-wrapper d-flex align-items-center">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" name="search" class="search-input form-control"
+                        placeholder="Search orders" value="{{ request.args.get('search', '') }}"
+                        oninput="if(this.value === '') window.location='{{ url_for('main.my_orders') }}';">
+                </div>
+
+                <button type="submit" class="btn btn-dark px-4 rounded-pill fw-semibold">
+                    Search
+                </button>
+            </form>
         </div>
 
-
-
-        <!-- PAID & AWAITING PICKUP (Stripe Paid Orders) -->
+        <!-- PENDING ORDERS -->
         <div class="mb-5">
             <h5 class="fw-bold text-uppercase text-muted mb-3 border-bottom pb-2">
-                Paid — Awaiting Pickup
+                Pending Requests
             </h5>
 
-            {% if paid_pending_pickup_orders %}
-            {% for order in paid_pending_pickup_orders %}
-            <div class="card shadow-sm border-0 mb-3 order-card border-start border-primary border-4">
+            {% if pending_orders %}
+            {% for order in pending_orders %}
+            <div class="card shadow-sm border-0 mb-3 order-card border-start border-warning border-4">
                 <div class="card-body p-4 d-flex flex-column flex-md-row gap-4 align-items-center">
 
-                    <!-- Image -->
                     <div class="flex-shrink-0">
-                        <img src="{{ url_for('static', filename=order.item.image_url) }}" alt="{{ order.item.title }}"
-                            class="rounded order-img shadow-sm">
+                        <img src="{{ url_for('static', filename=order.item.image_url) }}" 
+                             class="rounded order-img shadow-sm" 
+                             alt="{{ order.item.title }}">
                     </div>
 
-                    <!-- Content -->
                     <div class="flex-grow-1 w-100">
-
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="fw-bold mb-0 text-primary">{{ order.item.title }}</h5>
-
-                            <span class="badge bg-primary status-badge px-3 py-2 rounded-pill">
-                                <i class="bi bi-cash me-1"></i> Paid
+                            <h5 class="fw-bold mb-0 text-warning">{{ order.item.title }}</h5>
+                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                                <i class="bi bi-hourglass-split me-1"></i> Pending
                             </span>
                         </div>
 
@@ -104,87 +84,100 @@
             </div>
             {% endfor %}
             {% else %}
-            <p class="text-muted small fst-italic">No orders waiting for pickup.</p>
+            <p class="text-muted small fst-italic">No pending requests.</p>
             {% endif %}
         </div>
 
-
         <!-- APPROVED ORDERS -->
         <div class="mb-5">
-            <h5 class="fw-bold text-uppercase text-muted mb-3 border-bottom pb-2">Ready for Pickup</h5>
+            <h5 class="fw-bold text-uppercase text-muted mb-3 border-bottom pb-2">
+                Approved — Ready for Pickup
+            </h5>
+
             {% if approved_orders %}
             {% for order in approved_orders %}
             <div class="card shadow-sm border-0 mb-3 order-card border-start border-success border-4">
                 <div class="card-body p-4 d-flex flex-column flex-md-row gap-4 align-items-center">
-                    <!-- Image -->
+
                     <div class="flex-shrink-0">
-                        {% if order.item.image_url %}
-                        <img src="{{ url_for('static', filename=order.item.image_url) }}" alt="{{ order.item.title }}"
-                            class="rounded order-img shadow-sm">
-                        {% else %}
-                        <div
-                            class="bg-light rounded order-img d-flex align-items-center justify-content-center text-muted border">
-                            <i class="bi bi-image fs-4"></i>
-                        </div>
-                        {% endif %}
+                        <img src="{{ url_for('static', filename=order.item.image_url) }}" 
+                             class="rounded order-img shadow-sm" 
+                             alt="{{ order.item.title }}">
                     </div>
-                    <!-- Content -->
+
                     <div class="flex-grow-1 w-100">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h5 class="fw-bold mb-0 text-success">{{ order.item.title }}</h5>
-                            <span class="badge bg-success status-badge px-3 py-2 rounded-pill">
+                            <span class="badge bg-success px-3 py-2 rounded-pill">
                                 <i class="bi bi-check-circle-fill me-1"></i> Approved
                             </span>
                         </div>
-                        <p class="text-muted mb-3">The seller accepted your offer! Please meet at the agreed
-                            location.</p>
 
+                        <p class="text-muted mb-3">
+                            The seller approved your request. Please meet at the agreed time and location.
+                        </p>
+
+                        {% if current_user.id == order.buyer_id %}
                         <button class="btn btn-outline-success btn-sm fw-medium w-100 w-md-auto"
                             onclick="confirmDelivery({{ order.id }})">
                             <i class="bi bi-bag-check-fill me-2"></i> Confirm Item Received
                         </button>
+                        {% endif %}
                     </div>
+
                 </div>
             </div>
             {% endfor %}
             {% else %}
-            <p class="text-muted small fst-italic">No orders are currently waiting for pickup.</p>
+            <p class="text-muted small fst-italic">No approved orders.</p>
             {% endif %}
         </div>
 
-        <!-- DELIVERED ORDERS -->
+        <!-- COMPLETED ORDERS -->
         <div class="mb-5">
-            <h5 class="fw-bold text-uppercase text-muted mb-3 border-bottom pb-2">Past Orders</h5>
-            {% if delivered_orders %}
-            {% for order in delivered_orders %}
+            <h5 class="fw-bold text-uppercase text-muted mb-3 border-bottom pb-2">Completed Orders</h5>
+
+            {% if completed_orders %}
+            {% for order in completed_orders %}
             <div class="card shadow-sm border-0 mb-3 opacity-75">
                 <div class="card-body p-3 d-flex align-items-center gap-3">
+
                     <div class="flex-grow-1">
-                        <h6 class="fw-bold mb-0 text-decoration-line-through text-secondary">{{ order.item.title
-                            }}</h6>
-                        <small class="text-muted">Completed on {{ order.created_at.strftime('%b %d, %Y')
-                            }}</small>
+                        <h6 class="fw-bold mb-0 text-secondary">{{ order.item.title }}</h6>
+                        <small class="text-muted">
+                            Completed on {{ order.created_at.strftime('%b %d, %Y') }}
+                        </small>
                     </div>
-                    <span class="badge bg-secondary status-badge rounded-pill">Delivered</span>
+
+                    <span class="badge bg-secondary rounded-pill">Completed</span>
                 </div>
             </div>
             {% endfor %}
             {% else %}
-            <p class="text-muted small fst-italic">No past orders yet.</p>
+            <p class="text-muted small fst-italic">No completed orders yet.</p>
             {% endif %}
         </div>
 
-    </div>
-    </div>
     </div>
 
     <footer class="border-top mt-5 py-4 bg-white text-center text-muted small">
         &copy; 2025 ColbyNow Merchandise. All rights reserved.
     </footer>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
+
+<script>
+function confirmDelivery(orderId) {
+    fetch(`/confirm_order/${orderId}`, {
+        method: "POST",
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
 
 </html>

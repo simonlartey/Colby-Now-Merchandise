@@ -161,7 +161,6 @@ class Order(db.Model):
 
     pickup_time = db.Column(db.DateTime, nullable=True)
     location = db.Column(db.String(255), nullable=False)
-    payment_method = db.Column(db.String(50), nullable=False)
     notes = db.Column(db.Text)
     status = db.Column(db.String(20), default="pending")
 

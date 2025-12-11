@@ -48,9 +48,6 @@ def create_app():
     app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
     app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
 
-    # Stripe Configuration
-    app.config["STRIPE_SECRET_KEY"] = os.getenv("STRIPE_SECRET_KEY")
-    app.config["STRIPE_PUBLIC_KEY"] = os.getenv("STRIPE_PUBLIC_KEY")
 
     # Initialize database and mail, migrate
     db.init_app(app)

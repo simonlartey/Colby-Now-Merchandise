@@ -25,7 +25,6 @@ requests-oauthlib==2.0.0
 SQLAlchemy==2.0.44
 torch
 torchvision
-stripe==14.0.1
 typing_extensions==4.15.0
 urllib3==2.5.0
 URLObject==3.0.0

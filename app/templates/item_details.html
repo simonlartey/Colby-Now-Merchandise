@@ -69,11 +69,25 @@
                     </div>
 
                     <div class="d-grid gap-3 mt-auto pt-4">
+
+                        <!-- Request Item Button -->
                         <a href="{{ url_for('main.place_order', item_id=item.id) }}"
-                            class="btn btn-primary btn-lg">Place an Order</a>
+                        class="btn btn-primary btn-lg fw-semibold">
+                            <i class="bi bi-handbag"></i> Place Order
+                        </a>
+
+                        <!-- Contact Seller Button -->
                         <a href="{{ url_for('main.seller_details', seller_id=item.seller_id) }}"
-                            class="btn btn-outline-primary">Contact Seller</a>
+                        class="btn btn-outline-primary fw-semibold">
+                            <i class="bi bi-chat-dots"></i> Contact Seller
+                        </a>
+
+                        <p class="text-muted small mt-2">
+                            *Payment is handled directly between buyer and seller.  
+                            ColbyNow does not process or collect payments.
+                        </p>
                     </div>
+
                 </div>
             </div>
         </div>
