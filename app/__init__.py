@@ -58,6 +58,9 @@ def create_app():
     migrate.init_app(app, db)
     from . import models
 
+    with app.app_context():
+        db.create_all()
+
     # Login manager setup
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
