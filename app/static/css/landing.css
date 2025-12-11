@@ -1,47 +1,141 @@
+/*  GLOBAL  */
 body {
-    font-family: Arial, sans-serif;
-    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
     background-color: #f8f9fa;
 }
+
+/*  NAVBAR (Frosted Glass)  */
 .navbar-public {
-    height: 80px;
+    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.6) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
+
+/* Logo image */
+.navbar-brand img {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+}
+
+/* Buttons */
+.colby-btn-primary {
+    background-color: #003A7D;
+    color: white;
+    border-radius: 20px;
+    padding: 8px 20px;
+    border: none;
+}
+
+.colby-btn-primary:hover {
+    background-color: #002A5C;
+}
+
+.colby-btn-outline {
+    border-radius: 20px;
+    padding: 8px 20px;
+    color: #003A7D;
+    border: 2px solid #003A7D;
+}
+
+.colby-btn-outline:hover {
+    background-color: #003A7D;
+    color: white;
+}
+
+/*  HERO SECTION  */
 .hero-section {
-    background-image: url("{{ url_for('static', filename='/static/css/images/miller_library.jpg') }}"); 
-    background-size: cover;
-    background-position: center;
-    height: 80vh;
-    min-height: 400px;
-    color: white;
-    position: relative;
-}
-.hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 40, 120, 0.65); 
+    height: 90vh;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+
+    /* FIXED: load your actual image */
+    background:
+        linear-gradient(rgba(0, 32, 85, 0.55), rgba(0, 32, 85, 0.55)),
+        url('../images/landing_page_hero.png') center/cover no-repeat;
+
+    animation: heroZoom 10s ease-in-out infinite;
+}
+
+/* Ken Burns Slow Zoom */
+@keyframes heroZoom {
+    0% { background-size: 100%; }
+    50% { background-size: 108%; }
+    100% { background-size: 100%; }
+}
+
+/* Hero card */
+.hero-card {
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(14px);
+    border-radius: 18px;
+    padding: 48px 55px;
+    max-width: 650px;
     text-align: center;
-    padding: 20px;
-}
-.colby-blue-btn {
-    background-color: #3b4a7d;
-    border-color: #3b4a7d;
     color: white;
-    transition: background-color 0.2s;
+    animation: fadeUp 1.2s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
 }
-.colby-blue-btn:hover {
-    background-color: #2a3562;
-    border-color: #2a3562;
+
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-title {
+    font-size: 2.6rem;
+    font-weight: 700;
+}
+
+.hero-subtitle {
+    font-size: 1.05rem;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+/*  WHY SECTION  */
+.why-section {
+    padding: 80px 0;
+    background: #ffffff;
+}
+
+.why-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e1e1e;
+    margin-bottom: 40px;
+}
+
+.why-card {
+    background: white;
+    border-radius: 16px;
+    padding: 35px;
+    text-align: center;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+    transition: transform 0.25s ease;
+}
+
+.why-card:hover {
+    transform: translateY(-6px);
+}
+
+.why-icon {
+    font-size: 34px;
+    color: #003A7D;
+    margin-bottom: 15px;
+}
+
+/*  FOOTER  */
+.footer {
+    background: #002A5C;
     color: white;
-}
-.feature-icon {
-    font-size: 3.5rem;
-    color: #3b4a7d;
-    margin-bottom: 1rem;
+    padding: 40px 0;
+    text-align: center;
+    font-size: 0.9rem;
 }
