@@ -43,6 +43,16 @@
           <span class="nav-profile-text">Profile</span>
         </a>
 
+        <a class="nav-link position-relative" href="{{ url_for('main.inbox') }}">
+          <i class="bi bi-chat-dots fs-5"></i>
+
+          {% if unread_count > 0 %}
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {{ unread_count }}
+          </span>
+          {% endif %}
+        </a>
+
         <!-- LOGOUT -->
         <a href="{{ url_for('auth.logout') }}" class="nav-profile-text text-decoration-none">
           Logout

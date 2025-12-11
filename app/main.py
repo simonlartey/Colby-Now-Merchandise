@@ -12,7 +12,9 @@ from flask import (
 
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from .models import Item, Order, User, RecentlyViewed, db
+from .models import Item, db, User, Order, Chat, RecentlyViewed
+from sqlalchemy import or_
+import pytz
 from .search_utils import generate_embedding
 import os
 from datetime import datetime
@@ -613,6 +615,88 @@ You have received a new message from the contact form:
     return render_template("contact_us.html")
 
 
+@main.route("/chat/<int:receiver_id>")
+@login_required
+def chat(receiver_id):
+    seller = User.query.get_or_404(receiver_id)
+
+    Chat.query.filter_by(
+        sender_id=receiver_id,
+        receiver_id=current_user.id,
+        is_read=False
+    ).update({"is_read": True})
+
+    db.session.commit()
+
+    return render_template("chat.html", receiver_id=receiver_id, receiver=seller)
+
+
+@main.route("/send_message", methods=["POST"])
+@login_required
+def send_message():
+    data = request.get_json()
+
+    if not data or not data.get("content"):
+        return jsonify({"success": False}), 400
+
+    msg = Chat(
+        sender_id=current_user.id,
+        receiver_id=data["receiver_id"],
+        content=data["content"]
+    )
+    db.session.add(msg)
+    db.session.commit()
+    return jsonify({"success": True})
+
+
+@main.route("/get_messages/<int:user_id>")
+@login_required
+def get_messages(user_id):
+    ny_tz = pytz.timezone("America/New_York")
+
+    msgs = Chat.query.filter(
+        ((Chat.sender_id == current_user.id) & (Chat.receiver_id == user_id)) |
+        ((Chat.sender_id == user_id) & (Chat.receiver_id == current_user.id))
+    ).order_by(Chat.timestamp).all()
+
+    return jsonify([
+        {
+            "sender": m.sender_id,
+            "content": m.content,
+            "time": m.timestamp
+                .replace(tzinfo=pytz.utc)
+                .astimezone(ny_tz)
+                .strftime("%b %d • %I:%M %p")
+        }
+        for m in msgs
+    ])
+
+@main.route("/inbox")
+@login_required
+def inbox():
+    users = (
+        User.query
+        .join(
+            Chat,
+            or_(
+                Chat.sender_id == User.id,
+                Chat.receiver_id == User.id
+            )
+        )
+        .filter(
+            or_(
+                Chat.sender_id == current_user.id,
+                Chat.receiver_id == current_user.id
+            )
+        )
+        .filter(User.id != current_user.id)
+        .distinct()
+        .all()
+    )
+
+    return render_template("inbox.html", conversations=users)
+ 
+ 
 @main.route("/profile")
 @login_required
 def profile():
