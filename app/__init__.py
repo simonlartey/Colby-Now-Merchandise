@@ -55,9 +55,6 @@ def create_app():
     migrate.init_app(app, db)
     from . import models
 
-    with app.app_context():
-        db.create_all()
-
     # Login manager setup
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
@@ -98,8 +95,7 @@ def create_app():
     def inject_unread_count():
         if current_user.is_authenticated:
             count = Chat.query.filter_by(
-                receiver_id=current_user.id,
-                is_read=False
+                receiver_id=current_user.id, is_read=False
             ).count()
             return dict(unread_count=count)
         return dict(unread_count=0)
