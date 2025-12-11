@@ -38,21 +38,6 @@ def home():
     Displays the homepage after a successful login or signup.
     Supports searching for items by keyword.
     """
-    search = request.args.get("search", "").strip()
-
-    if search:
-        # User performed a search — show filtered results
-        # Use semantic search
-        results = Item.semantic_search(search, limit=12)
-
-        return render_template(
-            "home.html",
-            user=current_user,
-            category_items=[],
-            recent_items=results,
-            current_search=search,
-        )
-
     # Default homepage
     categories = ["electronics", "clothing", "furniture", "books", "miscellaneous"]
 
@@ -77,7 +62,6 @@ def home():
         user=current_user,
         category_items=category_items,
         recent_items=recent_items,
-        current_search=None,
     )
 
 

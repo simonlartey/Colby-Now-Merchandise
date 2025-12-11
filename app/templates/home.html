@@ -69,13 +69,8 @@
 
     <!-- Featured Items / Search Results -->
     <section id="search-results" class="featured text-center py-12">
-        {% if current_search %}
-        <h2 class="text-3xl font-bold mb-10">Search Results for "{{ current_search }}"</h2>
-        <p class="mb-6 text-gray-600">Items matching your search</p>
-        {% else %}
         <h2 class="text-3xl font-bold mb-10">Recently posted items</h2>
         <p class="mb-6 text-gray-600">View the latest priced and free items</p>
-        {% endif %}
 
         {% if recent_items %}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -98,8 +93,7 @@
         {% else %}
         <div class="mt-5">
             <i class="bi bi-inbox text-gray-400" style="font-size: 3rem;"></i>
-            <p class="text-gray-600 mt-3">No items found. Try another search term.</p>
-            <a href="{{ url_for('main.home') }}" class="btn btn-outline-dark mt-2">Clear Search</a>
+            <p class="text-gray-600 mt-3">No items posted yet.</p>
         </div>
         {% endif %}
     </section>
