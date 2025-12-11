@@ -1,5 +1,5 @@
 import numpy as np
-from sentence_transformers import SentenceTransformer
+
 import pickle
 
 # Singleton model instance
@@ -12,6 +12,9 @@ def get_model():
     """
     global _model
     if _model is None:
+        # Lazy import to avoid high memory usage on startup and allow running without the package installed
+        from sentence_transformers import SentenceTransformer
+
         # 'all-MiniLM-L6-v2' is a good balance of speed and quality
         _model = SentenceTransformer("all-MiniLM-L6-v2")
     return _model
