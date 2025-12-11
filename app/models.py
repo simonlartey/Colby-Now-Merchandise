@@ -1,6 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from datetime import datetime
+import pickle
+from .search_utils import generate_embedding, cosine_similarity
 
 db = SQLAlchemy()
 
@@ -74,6 +76,9 @@ class Item(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     seller_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
+    embedding = db.Column(
+        db.PickleType, nullable=True
+    )  # Stores numpy array of embedding
 
     def __repr__(self):
         return f"<Item {self.title} (${self.price})>"
@@ -90,6 +95,47 @@ class Item(db.Model):
         return cls.query.filter(
             cls.title.ilike(f"%{term}%") | cls.description.ilike(f"%{term}%")
         )
+
+    @classmethod
+    def semantic_search(cls, term, limit=20, threshold=0.25):
+        """
+        Performs a semantic search using cosine similarity on embeddings.
+        Fallback to standard search if no term provided.
+        Returns a list of Items (not a query object).
+        """
+        if not term:
+            return (
+                cls.query.filter_by(is_active=True)
+                .order_by(cls.created_at.desc())
+                .limit(limit)
+                .all()
+            )
+
+        # 1. Generate query embedding
+        query_emb = generate_embedding(term)
+        if query_emb is None:
+            return []
+
+        # 2. Fetch all active items with embeddings
+        # NOTE: This loads all active item embeddings into memory.
+        # OK for <10k items. For larger scale, use pgvector or dedicated vector DB.
+        items = cls.query.filter(cls.is_active == True, cls.embedding != None).all()
+
+        if not items:
+            return []
+
+        # 3. Calculate similarities
+        scored_items = []
+        for item in items:
+            score = cosine_similarity(query_emb, item.embedding)
+            if score >= threshold:
+                scored_items.append((score, item))
+
+        # 4. Sort by score (descending)
+        scored_items.sort(key=lambda x: x[0], reverse=True)
+
+        # 5. Return top N items
+        return [item for score, item in scored_items[:limit]]
 
 
 class Order(db.Model):
