@@ -32,6 +32,21 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return f"<User {self.email}>"
+    
+
+    messages_sent = db.relationship(
+    "Chat",
+    foreign_keys="Chat.sender_id",
+    backref="sender",
+    lazy="dynamic"
+    )
+
+    messages_received = db.relationship(
+        "Chat",
+        foreign_keys="Chat.receiver_id",
+        backref="receiver",
+        lazy="dynamic"
+    )
 
 
 class Item(db.Model):
@@ -86,3 +101,13 @@ class Order(db.Model):
 
     def __repr__(self):
         return f"<Order {self.item_id} (${self.price_offer})>"
+
+class Chat(db.Model):
+    __tablename__ = "chat"
+
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False) 
