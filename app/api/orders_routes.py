@@ -22,9 +22,7 @@ ALLOWED_STATUSES = {"pending", "approved", "rejected", "completed"}
 def register_routes(api):
     """Register orders routes to the API blueprint."""
 
-    # -------------------------
     # List orders
-    # -------------------------
 
     @api.route("/orders", methods=["GET"])
     @require_api_auth
@@ -73,9 +71,7 @@ def register_routes(api):
             message="Orders retrieved successfully",
         )
 
-    # -------------------------
     # Get single order
-    # -------------------------
 
     @api.route("/orders/<int:order_id>", methods=["GET"])
     @require_api_auth
@@ -97,9 +93,7 @@ def register_routes(api):
             message="Order retrieved successfully",
         )
 
-    # -------------------------
     # Create order
-    # -------------------------
 
     @api.route("/orders", methods=["POST"])
     @require_api_auth
@@ -150,9 +144,7 @@ def register_routes(api):
             status_code=201,
         )
 
-    # -------------------------
     # Seller actions
-    # -------------------------
 
     @api.route("/orders/<int:order_id>/approve", methods=["POST"])
     @require_api_auth
@@ -199,9 +191,7 @@ def register_routes(api):
             message="Order rejected successfully",
         )
 
-    # -------------------------
     # Completion & cancellation
-    # -------------------------
 
     @api.route("/orders/<int:order_id>/complete", methods=["POST"])
     @require_api_auth
