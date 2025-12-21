@@ -5,6 +5,7 @@ from flask_dance.contrib.google import make_google_blueprint
 from .models import db, User, Chat
 from .auth import auth
 from .main import main
+from .api import create_api_blueprint
 import os
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask_migrate import Migrate
@@ -68,6 +69,10 @@ def create_app():
     # Register blueprints
     app.register_blueprint(auth, url_prefix="/auth")
     app.register_blueprint(main)
+    
+    # Register REST API blueprint
+    api_bp = create_api_blueprint()
+    app.register_blueprint(api_bp)
 
     # OAuth setup for Google Login
     google_bp = make_google_blueprint(
