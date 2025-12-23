@@ -259,8 +259,10 @@ def test_verify_email_already_verified(client, app):
 
 
 def test_google_login_redirects_when_not_authorized(client, monkeypatch):
-    # Monkeypatch the "google" proxy in auth blueprint
-    from app import auth as auth_module
+    # Patch the google object in app.auth module correctly
+    import sys
+
+    auth_module = sys.modules["app.auth"]
 
     class DummyGoogle:
         @property
@@ -279,7 +281,9 @@ def test_google_login_redirects_when_not_authorized(client, monkeypatch):
 
 
 def test_google_login_creates_and_logs_in_user(client, monkeypatch, app):
-    from app import auth as auth_module
+    import sys
+
+    auth_module = sys.modules["app.auth"]
 
     class DummyResp:
         def json(self):
@@ -330,7 +334,9 @@ def test_login_timing_protection(client):
 
 def test_google_login_non_colby(client, monkeypatch):
     """Tests the restriction on non-Colby Google accounts."""
-    from app import auth as auth_module
+    import sys
+
+    auth_module = sys.modules["app.auth"]
 
     class DummyGoogle:
         authorized = True
@@ -345,20 +351,3 @@ def test_google_login_non_colby(client, monkeypatch):
     monkeypatch.setattr(auth_module, "google", DummyGoogle())
     resp = client.get("/auth/google", follow_redirects=True)
     assert b"Please use your @colby.edu email address" in resp.data
-
-
-def test_google_login_redirects_when_not_authorized(client, monkeypatch):
-    import app.auth as auth_logic_module
-
-    class DummyGoogle:
-        @property
-        def authorized(self):
-            return False
-
-        def login(self):
-            return "redirect-to-google"
-
-    monkeypatch.setattr(auth_logic_module, "google", DummyGoogle())
-
-    resp = client.get("/auth/google")
-    assert resp.status_code in (302, 303)
