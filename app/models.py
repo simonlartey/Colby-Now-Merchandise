@@ -151,7 +151,7 @@ class Item(db.Model):
 
         # 2. Fetch all active items with embeddings
         # NOTE: This loads all active item embeddings into memory.
-        # OK for <10k items. 
+        # OK for <10k items.
         items = cls.query.filter(cls.is_active == True).all()
         items = [item for item in items if item.embedding is not None]
 

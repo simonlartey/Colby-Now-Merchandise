@@ -1,5 +1,6 @@
 import re
 
+
 def is_valid_email(email: str) -> bool:
     """
     Validates an email and ensures it is a @colby.edu address.
