@@ -341,7 +341,9 @@ def edit_item(item_id):
             if uploaded_image_filename != "":
                 old_item_image = item.item_image
                 if old_item_image:
-                    current_app.s3_client.delete_object(Bucket=current_app.s3_bucket_id, Key=old_item_image)
+                    current_app.s3_client.delete_object(
+                        Bucket=current_app.s3_bucket_id, Key=old_item_image
+                    )
                 item.item_image = uploaded_image_filename
 
             db.session.commit()
@@ -588,9 +590,18 @@ def send_message():
     if not data or not data.get("content"):
         return jsonify({"success": False}), 400
 
+    receiver_id = data.get("receiver_id")
+    if not receiver_id:
+        return jsonify({"success": False}), 400
+
+    # Validate receiver exists
+    receiver = User.query.get(receiver_id)
+    if not receiver:
+        return jsonify({"error": "Receiver not found"}), 404
+
     msg = Chat(
         sender_id=current_user.id,
-        receiver_id=data["receiver_id"],
+        receiver_id=receiver_id,
         content=data["content"],
     )
     db.session.add(msg)
@@ -700,7 +711,9 @@ def update_profile():
     if uploaded_image_filename != "":
         old_profile_image = current_user.profile_image
         if old_profile_image:
-            current_app.s3_client.delete_object(Bucket=current_app.s3_bucket_id, Key=old_profile_image)
+            current_app.s3_client.delete_object(
+                Bucket=current_app.s3_bucket_id, Key=old_profile_image
+            )
         current_user.profile_image = uploaded_image_filename
     db.session.commit()
     return redirect(url_for("main.profile"))
