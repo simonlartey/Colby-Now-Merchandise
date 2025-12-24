@@ -36,7 +36,8 @@
         <!-- PROFILE -->
         <a href="{{ url_for('main.profile') }}" class="d-flex align-items-center text-decoration-none gap-2">
 
-          <img src="{{ url_for('static', filename=current_user.profile_image or 'images/default_user_profile.png') }}"
+          <img src="{{ current_user.profile_image_url }}"
+            onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_user_profile.png') }}';"
             class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #e2e6ea;"
             alt="Profile">
 

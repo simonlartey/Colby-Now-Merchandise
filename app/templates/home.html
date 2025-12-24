@@ -48,14 +48,9 @@
             {% for item in category_items %}
             <div class="category-item bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer"
                 onclick="window.location.href='{{ url_for('main.buy_item', category=item.category) }}'">
-                {% if item.image_url %}
-                <img src="{{ url_for('static', filename=item.image_url) }}" alt="{{ item.title }}"
-                    class="mx-auto w-40 h-40 object-contain mb-4">
-                {% else %}
-                <div class="mx-auto w-40 h-40 bg-gray-200 flex items-center justify-center mb-4 rounded">
-                    <i class="bi bi-image text-gray-400" style="font-size: 3rem;"></i>
-                </div>
-                {% endif %}
+                <img src="{{ item.item_image_url }}"
+                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.png') }}'"
+                    alt="{{ item.title }}" class="mx-auto w-40 h-40 object-contain mb-4">
                 <h3 class="text-lg font-semibold">{{ item.title }}</h3>
                 <p class="text-sm font-bold">${{ "%.2f"|format(item.price) }}</p>
                 {% if item.category %}
@@ -67,7 +62,7 @@
     </section>
 
 
-    <!-- Featured Items / Search Results -->
+    <!-- Featured Items -->
     <section id="search-results" class="featured text-center py-12">
         <h2 class="text-3xl font-bold mb-10">Recently posted items</h2>
         <p class="mb-6 text-gray-600">View the latest priced and free items</p>
@@ -77,14 +72,10 @@
             {% for item in recent_items %}
             <div class="item-card bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer"
                 onclick="window.location.href='{{ url_for('main.item_details', item_id=item.id) }}'">
-                {% if item.image_url %}
-                <img src="{{ url_for('static', filename=item.image_url) }}" alt="{{ item.title }}"
+                <img src="{{ item.item_image_url }}"
+                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.png') }}'"
+                    alt="{{ item.title }}"
                     class="mx-auto w-40 h-40 object-contain mb-4">
-                {% else %}
-                <div class="mx-auto w-40 h-40 bg-gray-200 flex items-center justify-center mb-4 rounded">
-                    <i class="bi bi-image text-gray-400" style="font-size: 3rem;"></i>
-                </div>
-                {% endif %}
                 <h3 class="text-lg font-semibold">{{ item.title }}</h3>
                 <p class="text-sm font-bold">${{ "%.2f"|format(item.price) }}</p>
             </div>

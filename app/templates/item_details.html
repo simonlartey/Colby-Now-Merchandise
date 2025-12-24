@@ -25,14 +25,8 @@
         <div class="row g-5">
             <div class="col-lg-7">
                 <div class="bg-white p-3 rounded border shadow-sm">
-                    {% if item.image_url %}
-                    <img src="{{ url_for('static', filename=item.image_url) }}" class="img-fluid rounded"
+                    <img src="{{ item.item_image_url }}" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.png') }}'" class="img-fluid rounded"
                         alt="{{ item.title }}">
-                    {% else %}
-                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
-                        <i class="bi bi-image fs-1 text-muted"></i>
-                    </div>
-                    {% endif %}
                 </div>
                 <p class="mt-4 fs-5 bg-white p-4 rounded border shadow-sm">
                     {{ item.description or "No description provided." }}

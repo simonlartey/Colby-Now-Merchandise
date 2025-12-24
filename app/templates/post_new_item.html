@@ -19,8 +19,21 @@
             min-height: 100vh;
         }
 
-        input[type="file"] {
-            display: none;
+        .form-control::file-selector-button {
+            background-color: #3b4a7d;
+            color: white;
+            border: none;
+        }
+
+        #file-upload:hover::file-selector-button {
+            background-color: #2a365d;
+            color: white;
+            border: none;
+        }
+
+        #submit-button {
+            background-color: #3b4a7d;
+            border-color: #3b4a7d;
         }
 
         main {
@@ -36,11 +49,9 @@
     <main class="container-lg my-5">
         <h1 class="display-5 fw-bold text-dark mb-4">Post a New Listing</h1>
 
-        <!-- Flash Messages -->
-
-
-        <form action="{{ url_for('main.post_item') }}" method="POST" enctype="multipart/form-data"
+        <form id="post-listing-form" action="{{ url_for('main.post_item') }}" method="POST"
             class="bg-white p-4 p-md-5 rounded-3 shadow-sm">
+            <input type="hidden" id="uploaded-image-filename" name="uploaded_image_filename">
             <div class="row g-5">
 
                 <div class="col-md-6">
@@ -60,14 +71,14 @@
                         <div>
                             <label class="form-label fw-semibold">Upload Images</label>
                             <div class="d-flex align-items-center gap-3">
-                                <label for="file-upload" class="btn btn-primary"
-                                    style="background-color: #3b4a7d; border-color: #3b4a7d;">
-                                    <span>Choose File</span>
-                                </label>
-                                <input id="file-upload" name="image" type="file" accept="image/*" required>
-                                <span class="text-secondary" id="file-chosen">None selected</span>
+                                <input id="file-upload" type="file" class="form-control"
+                                    aria-describedby="fileUploadHelp"
+                                    accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" required>
+                                <div id="file-upload-feedback" class="invalid-feedback">Please select a valid image
+                                    file.</div>
                             </div>
-                            <small class="text-muted">Accepted formats: PNG, JPG, JPEG, GIF, WEBP (Max 16MB)</small>
+                            <div id="fileUploadHelp" class="form-text">Accepted formats: PNG, JPG, JPEG, GIF, WEBP
+                                (Max 16MB)</div>
                         </div>
 
                         <div>
@@ -121,9 +132,8 @@
                             </select>
                         </div>
 
-                        <div class="mt-auto pt-4"> <button type="submit"
-                                class="btn btn-primary w-100 py-3 fs-6 fw-medium"
-                                style="background-color: #3b4a7d; border-color: #3b4a7d;">
+                        <div class="mt-auto pt-4"> <button type="submit" id="submit-button"
+                                class="btn btn-primary w-100 py-3 fs-6 fw-medium">
                                 Post this listing
                             </button>
                         </div>
@@ -140,7 +150,7 @@
                 <div class="col-md-6 col-lg-5">
                     <h3 class="fs-2 fw-bold text-dark mb-2">Sign up for our newsletter</h3>
                     <p class="text-secondary mb-4">Be the first to know about our special offers, news, and updates.</p>
-                    <form class="d-flex gap-2">
+                    <form id="newsletter-form" class="d-flex gap-2">
                         <input type="email" placeholder="Email Address" class="form-control py-3">
                         <button type="submit" class="btn btn-dark px-4">
                             Sign Up
@@ -181,18 +191,91 @@
         crossorigin="anonymous"></script>
 
     <script>
-        // Update file name display when a file is selected
-        const fileInput = document.getElementById('file-upload');
-        const fileChosen = document.getElementById('file-chosen');
+        // validate selected file
+        const fileInput = document.querySelector("#file-upload");
+        const submitButton = document.querySelector("#submit-button");
+        const fileUploadFeedback = document.querySelector("#file-upload-feedback")
 
-        fileInput.addEventListener('change', function () {
-            if (this.files && this.files.length > 0) {
-                fileChosen.textContent = this.files[0].name;
-            } else {
-                fileChosen.textContent = 'None selected';
+        fileInput.addEventListener("change", (event) => {
+            if (fileInput.files.length == 0) {
+                fileUploadFeedback.textContent = "Please select a valid image file.";
+                fileInput.classList.add("is-invalid");
+                submitButton.disabled = true;
+                return;
             }
-        });
+            const selectedFile = fileInput.files[0];
+            const validFileTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"]
+            if (!validFileTypes.includes(selectedFile.type)) {
+                fileUploadFeedback.textContent = "Please select an image file with a supported file format.";
+                fileInput.classList.add("is-invalid");
+                submitButton.disabled = true;
+            }
+            else if (selectedFile.size > 16777216) {
+                fileUploadFeedback.textContent = "Please select an image file with size less than 16MB.";
+                fileInput.classList.add("is-invalid");
+                submitButton.disabled = true;
+            }
+            else {
+                fileInput.classList.remove("is-invalid")
+                submitButton.disabled = false;
+            }
+        })
+
+        // upload image to cloud storage bucket
+        const form = document.querySelector("#post-listing-form");
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            submitButton.innerHTML = `
+            <span class='spinner-border spinner-border-sm' aria-hidden='true'></span>
+            <span role='status'> Posting... </span>`
+            submitButton.disabled = true;
+
+            const selectedFile = fileInput.files[0];
+            try {
+                const putUrlResponse = await fetch("{{ url_for('api.item_image_put_url') }}",
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            "filename": selectedFile.name,
+                            "contentType": selectedFile.type
+                        })
+                    }
+                );
+
+                if (!putUrlResponse.ok) {
+                    throw new Error("Network response was not OK while fetching PUT URL!");
+                }
+
+                const data = await putUrlResponse.json();
+                const putUrl = data["putUrl"];
+                const newFilename = data["newFilename"];
+
+                const uploadFileResponse = await fetch(putUrl,
+                    {
+                        method: "PUT",
+                        headers: { "Content-Type": selectedFile.type },
+                        body: selectedFile
+                    }
+                )
+
+                if (!uploadFileResponse.ok) {
+                    throw new Error("Network response was not OK while uploading file to storage bucket!")
+                }
+
+                const imageFilenameInput = document.querySelector("#uploaded-image-filename");
+                imageFilenameInput.value = newFilename;
+                form.submit();
+
+            } catch (error) {
+                submitButton.textContent = "Post this listing";
+                submitButton.disabled = false;
+                console.error(`There was an errror uploading the selected image: ${error}`)
+                alert("Sorry, there was a problem uploading your image.  Please try again or Contact ColbyNow Merchandise support for assistance.");
+            }
+        })
     </script>
+
 </body>
 
 </html>

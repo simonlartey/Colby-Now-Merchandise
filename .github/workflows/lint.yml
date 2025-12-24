@@ -1,0 +1,23 @@
+name: Linting
+
+# Trigger the workflow on push or pull request events
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.13"  # Matches a modern Python environment
+        
+    - name: Install Black
+      run: pip install black
+
+    - name: Run Black
+      # The --check flag means "don't change the files, just tell me if they are wrong"
+      run: black --check .

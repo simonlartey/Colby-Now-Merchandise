@@ -38,7 +38,8 @@
 
             <!-- ITEM PREVIEW CARD -->
             <div class="item-preview border-bottom pb-3 mb-4 d-flex gap-3 align-items-center">
-                <img src="{{ url_for('static', filename=item.image_url) }}" 
+                <img src="{{ item.item_image_url }}" 
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.png') }}'"
                      alt="Item Image"
                      class="rounded"
                      style="width:110px; height:110px; object-fit:cover;">
