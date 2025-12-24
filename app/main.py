@@ -11,7 +11,6 @@ from flask import (
 )
 
 from flask_login import login_required, current_user
-from werkzeug.utils import secure_filename
 from .models import Item, db, User, Order, Chat, RecentlyViewed
 from sqlalchemy import or_
 import pytz
@@ -319,12 +318,17 @@ def edit_item(item_id):
 
     if request.method == "POST":
         try:
-            item.title = request.form.get("title", item.title).strip()
-            item.description = request.form.get("description", item.description).strip()
-            item.category = request.form.get("category", item.category).strip()
-            item.size = request.form.get("size", item.size).strip()
-            item.seller_type = request.form.get("seller_type", item.seller_type).strip()
-            item.condition = request.form.get("condition", item.condition).strip()
+
+            def get_stripped(key, default):
+                val = request.form.get(key, default)
+                return val.strip() if val else val
+
+            item.title = get_stripped("title", item.title)
+            item.description = get_stripped("description", item.description)
+            item.category = get_stripped("category", item.category)
+            item.size = get_stripped("size", item.size)
+            item.seller_type = get_stripped("seller_type", item.seller_type)
+            item.condition = get_stripped("condition", item.condition)
             price_str = request.form.get("price", str(item.price))
             try:
                 price_clean = price_str.replace("$", "").replace(",", "").strip()
@@ -375,8 +379,6 @@ def delete_item(item_id):
 @login_required
 def place_order(item_id):
     item = Item.query.get_or_404(item_id)
-    if item is None:
-        print("cannot find this item")
     return render_template("order_page.html", item=item)
 
 
@@ -708,7 +710,7 @@ def update_profile():
     uploaded_image_filename = request.form.get("uploaded_image_filename")
     current_user.first_name = first_name
     current_user.last_name = last_name
-    if uploaded_image_filename != "":
+    if uploaded_image_filename and uploaded_image_filename != "":
         old_profile_image = current_user.profile_image
         if old_profile_image:
             current_app.s3_client.delete_object(

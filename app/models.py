@@ -151,8 +151,9 @@ class Item(db.Model):
 
         # 2. Fetch all active items with embeddings
         # NOTE: This loads all active item embeddings into memory.
-        # OK for <10k items. For larger scale, use pgvector or dedicated vector DB.
-        items = cls.query.filter(cls.is_active == True, cls.embedding != None).all()
+        # OK for <10k items. 
+        items = cls.query.filter(cls.is_active == True).all()
+        items = [item for item in items if item.embedding is not None]
 
         if not items:
             return []
