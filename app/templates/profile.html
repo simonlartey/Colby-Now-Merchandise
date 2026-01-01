@@ -331,7 +331,7 @@
                         throw new Error("Network response was not OK while fetching PUT URL!");
                     }
 
-                    const data = await putUrlResponse.json();
+                    const data = (await putUrlResponse.json()).data;
                     const putUrl = data["putUrl"];
                     const newFilename = data["newFilename"];
 

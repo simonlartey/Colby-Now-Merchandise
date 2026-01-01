@@ -178,7 +178,7 @@
             <div class="container-xl">
                 <div class="d-flex flex-column flex-sm-row justify-content-between text-center text-sm-start"
                     style="font-size: 0.75rem;">
-                    <p class="mb-2 mb-sm-0">&copy; 2025 Colby Now Merchandise | Built by BitWise CacheFlow | Powered by
+                    <p class="mb-2 mb-sm-0">&copy; 2026 Colby Now Merchandise | Built by BitWise CacheFlow | Powered by
                         Colby College ITS</p>
                     <p>COPYRIGHTS COLBY.EDU. ALL RIGHTS RESERVED</p>
                 </div>
@@ -247,7 +247,7 @@
                     throw new Error("Network response was not OK while fetching PUT URL!");
                 }
 
-                const data = await putUrlResponse.json();
+                const data = (await putUrlResponse.json()).data;
                 const putUrl = data["putUrl"];
                 const newFilename = data["newFilename"];
 

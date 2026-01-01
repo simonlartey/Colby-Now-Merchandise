@@ -170,7 +170,7 @@
                         throw new Error("Network response was not OK while fetching PUT URL!");
                     }
 
-                    data = await putUrlResponse.json();
+                    data = (await putUrlResponse.json()).data;
                     putUrl = data["putUrl"];
                     newFilename = data["newFilename"];
 
@@ -181,11 +181,11 @@
                         body: selectedFile
                     });
 
-                    if (!uploadFileResponse.ok){
+                    if (!uploadFileResponse.ok) {
                         throw new Error("Network response was not OK while uploading file to storage bucket!");
                     }
 
-                    const imageFilenameInput = document.querySelector("#uploaded-image-filename"); 
+                    const imageFilenameInput = document.querySelector("#uploaded-image-filename");
                     imageFilenameInput.value = newFilename;
                     form.submit();
 
