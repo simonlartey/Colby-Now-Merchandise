@@ -16,14 +16,13 @@ os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 
 # Mock imported libraries
 sys.modules["boto3"] = MagicMock()
-botocore_mock = MagicMock()
-sys.modules["botocore"] = botocore_mock
-botocore_config_mock = MagicMock()
-sys.modules["botocore.config"] = botocore_config_mock
+sys.modules["botocore"] = MagicMock()
+sys.modules["botocore.config"] = MagicMock()
+sys.modules["botocore.exceptions"] = MagicMock()
 sys.modules["sentence_transformers"] = MagicMock()
 
 from app import create_app
-from app.models import db, User, Item, Order, Chat
+from app.models import db, User, Item, Order
 
 
 @pytest.fixture(scope="session")
