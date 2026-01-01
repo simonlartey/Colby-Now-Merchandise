@@ -6,7 +6,7 @@ Standardized response format for all API endpoints
 from flask import jsonify, request
 from functools import wraps
 from flask_login import current_user
-
+from app.services.user_service import get_user_activity_stats
 
 # Standard Responses
 
@@ -105,7 +105,7 @@ def validate_json(*required_fields):
 # Serialization Helpers
 
 
-def serialize_user(user, include_email=False):
+def serialize_user(user, include_email=False, include_stats=False):
     """
     Serialize a User model into a safe public representation.
     """
@@ -121,7 +121,11 @@ def serialize_user(user, include_email=False):
 
     if include_email:
         data["email"] = user.email
-
+    
+    if include_stats:
+        user_stats = get_user_activity_stats(user)
+        for stat in user_stats:
+            data[stat] = user_stats[stat]
     return data
 
 
