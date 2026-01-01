@@ -16,8 +16,8 @@ assignees: ''
 2.
 3.
 
-## � Proposed Solution (optional)
+## 💡 Proposed Solution (optional)
 [If you have a suggestion on how to fix this issue, let us know!]
 
-## �📎 Additional Context
+## 📎 Additional Context
 [Add any other context, screenshots, or logs here.]
