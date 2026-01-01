@@ -16,7 +16,7 @@ from .responses import (
     serialize_order,
 )
 
-ALLOWED_STATUSES = {"pending", "approved", "rejected", "completed"}
+ALLOWED_STATUSES = {"pending", "approved", "rejected", "completed", "cancelled"}
 
 
 def register_routes(api):
@@ -159,6 +159,9 @@ def register_routes(api):
 
         if order.status != "pending":
             return error_response("Order cannot be approved", 400)
+        
+        if not order.item.is_active:
+            return error_response("Item is no longer available", 400)
 
         order.status = "approved"
         order.item.is_active = False
@@ -235,7 +238,7 @@ def register_routes(api):
         if order.status == "approved":
             order.item.is_active = True
 
-        db.session.delete(order)
+        order.status = "cancelled"
         db.session.commit()
 
         return success_response(message="Order cancelled successfully")
