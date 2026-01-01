@@ -3,7 +3,7 @@ Orders API endpoints
 REST endpoints for creating, managing, and tracking orders
 """
 
-from flask import request
+from flask import request, current_app
 from flask_login import current_user
 from datetime import datetime
 
@@ -135,8 +135,13 @@ def register_routes(api):
             status="pending",
         )
 
-        db.session.add(order)
-        db.session.commit()
+        try:
+            db.session.add(order)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            current_app.logger.exception("Error creating order")
+            return error_response("An unexpected error occurred", 500)
 
         return success_response(
             data=serialize_order(order),
@@ -159,13 +164,18 @@ def register_routes(api):
 
         if order.status != "pending":
             return error_response("Order cannot be approved", 400)
-        
+
         if not order.item.is_active:
             return error_response("Item is no longer available", 400)
 
-        order.status = "approved"
-        order.item.is_active = False
-        db.session.commit()
+        try:
+            order.status = "approved"
+            order.item.is_active = False
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            current_app.logger.exception(f"Error approving order {order_id}")
+            return error_response("An unexpected error occurred", 500)
 
         return success_response(
             data=serialize_order(order),
@@ -186,8 +196,13 @@ def register_routes(api):
         if order.status != "pending":
             return error_response("Order cannot be rejected", 400)
 
-        order.status = "rejected"
-        db.session.commit()
+        try:
+            order.status = "rejected"
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            current_app.logger.exception(f"Error rejecting order {order_id}")
+            return error_response("An unexpected error occurred", 500)
 
         return success_response(
             data=serialize_order(order),
@@ -213,8 +228,13 @@ def register_routes(api):
         if not (is_buyer or is_seller):
             return error_response("Not authorized", 403)
 
-        order.status = "completed"
-        db.session.commit()
+        try:
+            order.status = "completed"
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            current_app.logger.exception(f"Error completing order {order_id}")
+            return error_response("An unexpected error occurred", 500)
 
         return success_response(
             data=serialize_order(order),
@@ -235,10 +255,15 @@ def register_routes(api):
         if order.status not in {"pending", "approved"}:
             return error_response("Order cannot be cancelled", 400)
 
-        if order.status == "approved":
-            order.item.is_active = True
+        try:
+            if order.status == "approved":
+                order.item.is_active = True
 
-        order.status = "cancelled"
-        db.session.commit()
+            order.status = "cancelled"
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            current_app.logger.exception(f"Error cancelling order {order_id}")
+            return error_response("An unexpected error occurred", 500)
 
         return success_response(message="Order cancelled successfully")
