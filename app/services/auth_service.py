@@ -64,7 +64,7 @@ def send_verification_email(user):
     s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
     token = s.dumps(user.email, salt="email-verify-salt")
 
-    verify_url = f"{current_app.config['BASE_URL']}/verify/{token}"
+    verify_url = url_for("auth.verify_email", token=token, _external=True)
 
     msg = Message(
         subject="Verify Your ColbyNow Account",
@@ -153,7 +153,7 @@ def generate_password_reset(email):
     s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
     token = s.dumps(email, salt="password-reset-salt")
 
-    reset_url = f"{current_app.config['BASE_URL']}/reset-password/{token}"
+    reset_url = url_for("auth.reset_password", token=token, _external=True)
 
     msg = Message(
         subject="Password Reset Request",
