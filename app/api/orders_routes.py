@@ -165,7 +165,7 @@ def register_routes(api):
         if order.status != "pending":
             return error_response("Order cannot be approved", 400)
 
-        if not order.item.is_active:
+        if not order.item.is_active or order.item.is_deleted:
             return error_response("Item is no longer available", 400)
 
         try:

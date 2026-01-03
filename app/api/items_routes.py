@@ -401,17 +401,22 @@ def register_routes(api):
         if not item:
             return error_response(message="Item not found", status_code=404)
 
-        # Check authorization
         if item.seller_id != current_user.id:
             return error_response(
                 message="Not authorized to delete this item", status_code=403
             )
 
-        # Soft delete
-        item.is_active = False
-        db.session.commit()
+        try:
+            item.is_deleted = True
+            item.is_active = False
+            db.session.commit()
+        except Exception:
+            current_app.logger.exception("Error deleting item")
+            return error_response(
+                message="Error deleting item. Please try again later", status_code=500
+            )
 
-        return success_response(message="Item deleted successfully")
+        return success_response(message="Item deleted successfully", status_code=200)
 
     @api.route("/items/<int:item_id>/favorites", methods=["POST"])
     @require_api_auth

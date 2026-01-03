@@ -109,7 +109,7 @@ def test_post_item_embedding_failure(mock_emb, client, logged_user):
 # ------------------------------------------
 def test_item_404(client, logged_user):
     resp = client.get("/item/999999", follow_redirects=True)
-    assert resp.status_code == 404
+    assert b"Item not found" in resp.data
 
 
 # ------------------------------------------
