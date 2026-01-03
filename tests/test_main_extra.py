@@ -144,6 +144,7 @@ def test_approve_order_404(client, logged_user):
     resp = client.post("/orders/999999/approve")
     assert resp.status_code == 404
 
+
 # ------------------------------------------
 # /edit_item: unauthorized + invalid file + exception
 # ------------------------------------------

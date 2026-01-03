@@ -291,7 +291,7 @@ def approve_order(order_id):
     if order.status != "pending":
         flash("This order cannot be approved.", "warning")
         return redirect(url_for("main.my_listings"))
-    
+
     if not order.item.is_active or order.item.is_deleted:
         flash("Item no longer available", "warning")
         return redirect(url_for("main.my_listings"))
@@ -810,4 +810,3 @@ def update_profile():
         current_user.profile_image = uploaded_image_filename
     db.session.commit()
     return redirect(url_for("main.profile"))
-
