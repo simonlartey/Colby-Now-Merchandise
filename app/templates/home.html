@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mule Mart - Home</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -25,8 +26,8 @@
     <section class="hero">
         <div class="hero-image">
             <div class="hero-overlay">
-                <img src="{{ url_for('static', filename='images/Miller_Library_Hero_Section_2.webp') }}" alt="background image"
-                    class="hero-bg" style="width:100%">
+                <img src="{{ url_for('static', filename='images/Miller_Library_Hero_Section_2.webp') }}"
+                    alt="background image" class="hero-bg" style="width:100%">
                 <div class="hero-text">
                     <h1 class="text-4xl font-bold text-white text-center mb-4">Hi {{ user.first_name }} !</h1>
                     <h2 class="text-2xl font-bold text-white text-center mb-4">Welcome to Mule Mart</h2>
