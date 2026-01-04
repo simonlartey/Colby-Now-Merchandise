@@ -39,18 +39,17 @@
                     <div class="card shadow-sm border-0 p-3">
 
                         <img src="{{ order.item.item_image_url }}"
-                             onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.png') }}'"
-                             class="rounded mb-3"
-                             style="height:180px; object-fit:cover; width:100%;">
+                            onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.webp') }}'"
+                            class="rounded mb-3" style="height:180px; object-fit:cover; width:100%;">
 
                         <h5 class="fw-bold">{{ order.item.title }}</h5>
                         <p class="text-muted small mb-1">
                             Buyer: <strong>{{ order.buyer.name }}</strong>
                         </p>
                         <p class="text-muted small">
-                            Pickup: {{ order.location }}  
+                            Pickup: {{ order.location }}
                             {% if order.pickup_time %}
-                                • {{ order.pickup_time }}
+                            • {{ order.pickup_time }}
                             {% endif %}
                         </p>
 
@@ -62,13 +61,15 @@
 
                         {% if current_user.id == order.item.seller_id %}
                         <div class="d-flex gap-2 mt-3">
-                            <form action="{{ url_for('main.approve_order', order_id=order.id) }}" method="POST" class="w-50">
+                            <form action="{{ url_for('main.approve_order', order_id=order.id) }}" method="POST"
+                                class="w-50">
                                 <button class="btn btn-success w-100">
                                     Approve
                                 </button>
                             </form>
 
-                            <form action="{{ url_for('main.reject_order', order_id=order.id) }}" method="POST" class="w-50">
+                            <form action="{{ url_for('main.reject_order', order_id=order.id) }}" method="POST"
+                                class="w-50">
                                 <button class="btn btn-outline-danger w-100">
                                     Reject
                                 </button>
@@ -97,9 +98,8 @@
                     <div class="card shadow-sm border-0 p-3">
 
                         <img src="{{ order.item.item_image_url }}"
-                             onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.png') }}'"
-                             class="rounded mb-3"
-                             style="height:180px; object-fit:cover; width:100%;">
+                            onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.webp') }}'"
+                            class="rounded mb-3" style="height:180px; object-fit:cover; width:100%;">
 
                         <h5 class="fw-bold">{{ order.item.title }}</h5>
 
@@ -110,13 +110,12 @@
                         <p class="text-muted small">
                             Pickup: {{ order.location }}
                             {% if order.pickup_time %}
-                                • {{ order.pickup_time }}
+                            • {{ order.pickup_time }}
                             {% endif %}
                         </p>
 
                         {% if current_user.id == order.item.seller_id %}
-                        <button class="btn btn-outline-success w-100 mt-2"
-                                onclick="markAsSold({{ order.id }})">
+                        <button class="btn btn-outline-success w-100 mt-2" onclick="markAsSold({{ order.id }})">
                             Mark as Sold
                         </button>
                         {% endif %}
@@ -160,22 +159,20 @@
         <!-- ============================= -->
         <!-- USER LISTINGS -->
         <!-- ============================= -->
-        <div id="items-section"
-             class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+        <div id="items-section" class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
 
             <h3 class="fw-bold mb-0">Your Items</h3>
 
             <form method="GET" action="{{ url_for('main.my_listings') }}#items-section"
-                  class="d-flex align-items-center gap-2 mt-3 mt-md-0">
+                class="d-flex align-items-center gap-2 mt-3 mt-md-0">
 
                 <div class="position-relative" style="width: 300px;">
                     <i class="bi bi-search position-absolute"
-                       style="left:12px; top:50%; transform:translateY(-50%); color:#555;"></i>
+                        style="left:12px; top:50%; transform:translateY(-50%); color:#555;"></i>
 
-                    <input type="text" name="search" class="form-control ps-5"
-                           placeholder="Search your listings..."
-                           value="{{ current_search or '' }}"
-                           oninput="if(this.value === '') window.location='{{ url_for('main.my_listings') }}#items-section';">
+                    <input type="text" name="search" class="form-control ps-5" placeholder="Search your listings..."
+                        value="{{ current_search or '' }}"
+                        oninput="if(this.value === '') window.location='{{ url_for('main.my_listings') }}#items-section';">
                 </div>
 
                 <button type="submit" class="btn btn-dark px-4 rounded-pill fw-semibold">
@@ -192,9 +189,8 @@
                 <div class="card listing-card border-0 shadow-sm h-100">
 
                     <img src="{{ item.item_image_url }}"
-                         onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.png') }}'"
-                         class="card-img-top rounded-top-4"
-                         alt="{{ item.title }}">
+                        onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.webp') }}'"
+                        class="card-img-top rounded-top-4" alt="{{ item.title }}">
 
                     <div class="card-body d-flex flex-column p-4">
                         <h5 class="card-title fw-semibold text-dark mb-2">{{ item.title }}</h5>
@@ -207,19 +203,19 @@
 
                         <div class="d-flex justify-content-between align-items-center mt-auto">
                             <a href="{{ url_for('main.item_details', item_id=item.id) }}"
-                               class="btn btn-outline-primary btn-sm px-3">
+                                class="btn btn-outline-primary btn-sm px-3">
                                 <i class="bi bi-eye"></i> View
                             </a>
 
                             <a href="{{ url_for('main.edit_item', item_id=item.id) }}"
-                               class="btn btn-warning btn-sm px-3">
+                                class="btn btn-warning btn-sm px-3">
                                 <i class="bi bi-pencil"></i> Edit
                             </a>
 
-                            <form action="{{ url_for('main.delete_item', item_id=item.id) }}"
-                                  method="POST" style="display:inline;">
+                            <form action="{{ url_for('main.delete_item', item_id=item.id) }}" method="POST"
+                                style="display:inline;">
                                 <button type="submit" class="btn btn-danger btn-sm px-3"
-                                        onclick="return confirm('Delete this listing?');">
+                                    onclick="return confirm('Delete this listing?');">
                                     <i class="bi bi-trash"></i> Delete
                                 </button>
                             </form>

@@ -25,7 +25,7 @@
     <section class="hero">
         <div class="hero-image">
             <div class="hero-overlay">
-                <img src="{{ url_for('static', filename='images/miller_library.jpg') }}" alt="background image"
+                <img src="{{ url_for('static', filename='images/miller_library.webp') }}" alt="background image"
                     class="hero-bg" style="width:100%">
                 <div class="hero-text">
                     <h1 class="text-4xl font-bold text-white text-center mb-4">Hi {{ user.name }} !</h1>
@@ -49,7 +49,7 @@
             <div class="category-item bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer"
                 onclick="window.location.href='{{ url_for('main.buy_item', category=item.category) }}'">
                 <img src="{{ item.item_image_url }}"
-                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.png') }}'"
+                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.webp') }}'"
                     alt="{{ item.title }}" class="mx-auto w-40 h-40 object-contain mb-4">
                 <h3 class="text-lg font-semibold">{{ item.title }}</h3>
                 <p class="text-sm font-bold">${{ "%.2f"|format(item.price) }}</p>
@@ -73,9 +73,8 @@
             <div class="item-card bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer"
                 onclick="window.location.href='{{ url_for('main.item_details', item_id=item.id) }}'">
                 <img src="{{ item.item_image_url }}"
-                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.png') }}'"
-                    alt="{{ item.title }}"
-                    class="mx-auto w-40 h-40 object-contain mb-4">
+                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.webp') }}'"
+                    alt="{{ item.title }}" class="mx-auto w-40 h-40 object-contain mb-4">
                 <h3 class="text-lg font-semibold">{{ item.title }}</h3>
                 <p class="text-sm font-bold">${{ "%.2f"|format(item.price) }}</p>
             </div>

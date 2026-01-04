@@ -68,7 +68,7 @@
 
                     <!-- Profile Image -->
                     <img src="{{ user.profile_image_url }}"
-                        onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_user_profile.png') }}';"
+                        onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default_user_profile.webp') }}';"
                         class="rounded-circle mb-3 mx-auto d-block" width="150" height="150" alt="Profile Image">
 
                     <h4 class="fw-bold mt-2">{{ user.first_name }} {{ user.last_name }}</h4>
@@ -128,10 +128,10 @@
                     <ul class="list-group mb-3">
                         {% for item in recent_items %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>{{ item.title }}</span>
-                                <a href="{{ url_for('main.item_details', item_id=item.id) }}" class="text-primary">
-                                    View
-                                </a>
+                            <span>{{ item.title }}</span>
+                            <a href="{{ url_for('main.item_details', item_id=item.id) }}" class="text-primary">
+                                View
+                            </a>
                         </li>
                         {% endfor %}
                     </ul>
@@ -156,26 +156,26 @@
                                     <!-- Thumbnail -->
                                     <a href="{{ url_for('main.item_details', item_id=order.item.id) }}">
                                         <img src="{{ order.item.item_image_url }}"
-                                            onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.png') }}'"
+                                            onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.webp') }}'"
                                             alt="{{ order.item.title }}" class="me-3"
                                             style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;">
                                     </a>
 
-                                        <!-- Title + Status -->
-                                        <div>
-                                            <a href="{{ url_for('main.item_details', item_id=order.item.id) }}"
-                                                class="fw-bold text-dark text-decoration-none">
-                                                {{ order.item.title }}
-                                            </a><br>
+                                    <!-- Title + Status -->
+                                    <div>
+                                        <a href="{{ url_for('main.item_details', item_id=order.item.id) }}"
+                                            class="fw-bold text-dark text-decoration-none">
+                                            {{ order.item.title }}
+                                        </a><br>
 
                                         {% if order.status == 'pending' %}
-                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        <span class="badge bg-warning text-dark">Pending</span>
                                         {% elif order.status == 'approved' %}
-                                            <span class="badge bg-success">Approved</span>
+                                        <span class="badge bg-success">Approved</span>
                                         {% elif order.status == 'delivered' %}
-                                            <span class="badge bg-info text-dark">Delivered</span>
+                                        <span class="badge bg-info text-dark">Delivered</span>
                                         {% elif order.status == 'rejected' %}
-                                            <span class="badge bg-danger">Rejected</span>
+                                        <span class="badge bg-danger">Rejected</span>
                                         {% endif %}
                                     </div>
                                 </div>

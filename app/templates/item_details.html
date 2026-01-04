@@ -25,8 +25,9 @@
         <div class="row g-5">
             <div class="col-lg-7">
                 <div class="bg-white p-3 rounded border shadow-sm">
-                    <img src="{{ item.item_image_url }}" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.png') }}'" class="img-fluid rounded"
-                        alt="{{ item.title }}">
+                    <img src="{{ item.item_image_url }}"
+                        onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.webp') }}'"
+                        class="img-fluid rounded" alt="{{ item.title }}">
                 </div>
                 <p class="mt-4 fs-5 bg-white p-4 rounded border shadow-sm">
                     {{ item.description or "No description provided." }}
@@ -66,18 +67,18 @@
 
                         <!-- Request Item Button -->
                         <a href="{{ url_for('main.place_order', item_id=item.id) }}"
-                        class="btn btn-primary btn-lg fw-semibold">
+                            class="btn btn-primary btn-lg fw-semibold">
                             <i class="bi bi-handbag"></i> Place Order
                         </a>
 
                         <!-- Contact Seller Button -->
                         <a href="{{ url_for('main.seller_details', seller_id=item.seller_id) }}"
-                        class="btn btn-outline-primary fw-semibold">
+                            class="btn btn-outline-primary fw-semibold">
                             <i class="bi bi-chat-dots"></i> Contact Seller
                         </a>
 
                         <p class="text-muted small mt-2">
-                            *Payment is handled directly between buyer and seller.  
+                            *Payment is handled directly between buyer and seller.
                             ColbyNow does not process or collect payments.
                         </p>
                     </div>

@@ -124,12 +124,13 @@
                     {% for item in items %}
                     <div class="col-md-6 col-lg-4">
                         <div class="card h-100 shadow-sm">
-                            <img src="{{ item.item_image_url }}" 
-                                onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.png') }}'"
-                                class="card-img-top"
-                                alt="{{ item.title }}" style="height: 200px; object-fit: cover;">
+                            <img src="{{ item.item_image_url }}"
+                                onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.webp') }}'"
+                                class="card-img-top" alt="{{ item.title }}" style="height: 200px; object-fit: cover;">
                             <div class="card-body d-flex flex-column position-relative">
-                                <i class="bi heart-icon position-absolute top-0 end-0 m-2 fs-4 {% if item.id in favorite_ids %}bi-heart-fill favorited{% else %}bi-heart{% endif %}" data-item-id="{{ item.id }}" title="{% if item.id in favorite_ids %}Remove from favorites{% else %}Add to favorites{% endif %}"></i>
+                                <i class="bi heart-icon position-absolute top-0 end-0 m-2 fs-4 {% if item.id in favorite_ids %}bi-heart-fill favorited{% else %}bi-heart{% endif %}"
+                                    data-item-id="{{ item.id }}"
+                                    title="{% if item.id in favorite_ids %}Remove from favorites{% else %}Add to favorites{% endif %}"></i>
                                 <h5 class="card-title">{{ item.title }}</h5>
                                 {% if item.description %}
                                 <p class="card-text text-muted small flex-grow-1">{{ item.description[:100] }}{% if

@@ -89,7 +89,7 @@
                 <div id="fileUploadHelp" class="form-text">Accepted formats: PNG, JPG, JPEG, GIF, WEBP (Max 16MB)</div>
                 {% if item.item_image %}
                 <p class="small text-muted mt-2">Current: <img src="{{ item.item_image_url }}"
-                        onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.png') }}'"
+                        onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default_item.webp') }}'"
                         width="120" class="rounded"></p>
                 {% endif %}
             </div>

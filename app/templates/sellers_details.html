@@ -37,7 +37,8 @@
             <div class="col-lg-4 col-md-5">
                 <div class="bg-white p-3 rounded border shadow-sm">
 
-                    <img src="{{ seller.profile_image_url }}" onerror="this.onerror=null; this.src='{{url_for('static', filename='images/default_user_profile.png')}}'"
+                    <img src="{{ seller.profile_image_url }}"
+                        onerror="this.onerror=null; this.src='{{url_for('static', filename='images/default_user_profile.webp')}}'"
                         class="img-fluid rounded" alt="{{ seller.name }}'s profile picture">
                 </div>
             </div>

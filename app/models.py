@@ -80,7 +80,7 @@ class User(UserMixin, db.Model):
         if self.profile_image:
             image_url = generate_get_url(filename=self.profile_image)
         return image_url or url_for(
-            "static", filename="images/default_user_profile.png"
+            "static", filename="images/default_user_profile.webp"
         )
 
 
@@ -171,7 +171,7 @@ class Item(db.Model):
         image_url = None
         if self.item_image:
             image_url = generate_get_url(filename=self.item_image)
-        return image_url or url_for("static", filename="images/default_item.png")
+        return image_url or url_for("static", filename="images/default_item.webp")
 
 
 class Order(db.Model):
