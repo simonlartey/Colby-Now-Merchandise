@@ -11,13 +11,17 @@ body {
     backdrop-filter: blur(12px);
     background: rgba(255, 255, 255, 0.6) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 3px;
+}
+
+.navbar-brand {
+    padding: 5px;
 }
 
 /* Logo image */
 .navbar-brand img {
-    height: 40px;
-    width: 40px;
-    border-radius: 50%;
+    height: 55px;
+    width: auto;
 }
 
 /* Buttons */
@@ -55,16 +59,24 @@ body {
     /* FIXED: load your actual image */
     background:
         linear-gradient(rgba(0, 32, 85, 0.55), rgba(0, 32, 85, 0.55)),
-        url('../images/landing_page_hero.png') center/cover no-repeat;
+        url('../images/landing_page_hero.webp') center/cover no-repeat;
 
     animation: heroZoom 10s ease-in-out infinite;
 }
 
 /* Ken Burns Slow Zoom */
 @keyframes heroZoom {
-    0% { background-size: 100%; }
-    50% { background-size: 108%; }
-    100% { background-size: 100%; }
+    0% {
+        background-size: 100%;
+    }
+
+    50% {
+        background-size: 108%;
+    }
+
+    100% {
+        background-size: 100%;
+    }
 }
 
 /* Hero card */

@@ -1,76 +1,92 @@
 body {
-    font-family: 'Lato', Arial, sans-serif;
-    font-size: 16px;
-    line-height: 1.8;
-    background: #f8f9fd;
-    color: #333;
-  }
-  
-  /* Colby theme colors */
-  :root {
-    --primary: #003366;
-    --accent: #d4af37;
-  }
-  
-  a {
-    color: var(--accent);
-    transition: 0.3s ease;
-  }
-  
-  a:hover {
-    color: var(--primary);
-    text-decoration: none;
-  }
-  
-  .ftco-section {
-    padding: 7em 0;
-  }
-  
-  .wrap {
-    width: 100%;
-    overflow: hidden;
-    background: #fff;
-    border-radius: 5px;
-    box-shadow: 0 10px 34px -15px rgba(0, 0, 0, 0.24);
-  }
-  
-  .img {
-    width: 100%;
-    height: 200px;
-    background-image: url("../images/bg-1.jpg");
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center center;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-  }
-  
-  .form-control {
-    height: 48px;
-    background: #fff;
-    border-radius: 5px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-  }
-  
-  .form-control:focus {
-    border: 1px solid var(--primary);
-    box-shadow: none;
-  }
-  
-  .btn-primary {
-    background-color: var(--primary);
-    border: 1px solid var(--primary);
-  }
-  
-  .btn-primary:hover {
-    background-color: transparent;
-    color: var(--primary);
-  }
-  
-  .text-warning {
-    color: var(--accent) !important;
-  }
-  
+  font-family: 'Lato', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #333;
+}
+
+.background {
+  background-position: 50%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  bottom: 0;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: -5;
+  background-image: url('../images/Colby\ Campus\ Background\ Image.webp');
+}
+
+/* Colby theme colors */
+:root {
+  --primary: #003366;
+  --accent: #d4af37;
+}
+
+a {
+  color: var(--accent);
+  transition: 0.3s ease;
+}
+
+a:hover {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.ftco-section {
+  padding: 7em 0;
+}
+
+.wrap {
+  width: 100%;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 10px 34px -15px rgba(0, 0, 0, 0.24);
+}
+
+
+.brand-avatar {
+  text-align: center;
+}
+
+.brand-avatar img {
+  height: 185px;
+  width: auto;
+  margin-bottom: 1.5rem;
+}
+
+#signin {
+  color: #04294e;
+  padding-top: 5px;
+}
+
+.form-control {
+  height: 48px;
+  background: #fff;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.form-control:focus {
+  border: 1px solid var(--primary);
+  box-shadow: none;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.btn-primary:hover {
+  background-color: transparent;
+  color: var(--primary);
+}
+
+.text-warning {
+  color: var(--accent) !important;
+}
+
 /* Checkbox */
 .checkbox-wrap {
   position: relative;
@@ -88,7 +104,7 @@ body {
   width: 20px;
   opacity: 0;
   cursor: pointer;
-  z-index: 2; 
+  z-index: 2;
 }
 
 .checkbox-wrap .checkmark {
@@ -102,7 +118,7 @@ body {
   transition: background-color 0.3s ease;
 }
 
-.checkbox-wrap input:checked ~ .checkmark {
+.checkbox-wrap input:checked~.checkmark {
   background-color: var(--primary);
 }
 
@@ -112,7 +128,7 @@ body {
   display: none;
 }
 
-.checkbox-wrap input:checked ~ .checkmark::after {
+.checkbox-wrap input:checked~.checkmark::after {
   display: block;
 }
 
@@ -126,41 +142,41 @@ body {
   transform: rotate(45deg);
 }
 
-  
-  .field-icon {
-    position: absolute;
-    right: 15px;
-    top: 30%; 
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: rgba(0, 0, 0, 0.4);
-    z-index: 2;
-  }
-  
-  
-  .form-group {
-    position: relative; 
-  }
-  
-  .form-control {
-    padding-right: 40px; 
-  }
-  
- 
-  .password-container {
-      position: relative;
-  }
 
-  .password-container .toggle-password {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-150%);
-      cursor: pointer;
-      font-size: 1.1rem;
-      color: rgba(0, 0, 0, 0.5);
-      z-index: 3;
-  }
+.field-icon {
+  position: absolute;
+  right: 15px;
+  top: 30%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+
+
+.form-group {
+  position: relative;
+}
+
+.form-control {
+  padding-right: 40px;
+}
+
+
+.password-container {
+  position: relative;
+}
+
+.password-container .toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-150%);
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: rgba(0, 0, 0, 0.5);
+  z-index: 3;
+}
 
 /* GOOGLE SIGN-IN BUTTON STYLES   */
 
