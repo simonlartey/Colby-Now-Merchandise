@@ -192,3 +192,21 @@ main {
     text-align: center;
     font-size: 0.9rem;
 }
+
+/*  FLASH MESSAGES OVERLAY  */
+.flash-overlay {
+    position: absolute;
+    width: 100%;
+    max-width: 600px;
+    top: 100%;
+    z-index: 1050;
+    pointer-events: none;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 1rem;
+}
+
+.flash-overlay .alert {
+    pointer-events: auto;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}

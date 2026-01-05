@@ -23,20 +23,27 @@
 
 <body>
 
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg navbar-public">
-        <div class="container-xl">
-            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.landing') }}">
-                <img src="{{ url_for('static', filename='images/Mule Mart Logo V10 (Transparent, Text).svg') }}"
-                    alt="Mule Mart Logo">
-            </a>
+    <!-- NAVBAR & FLASH MESSAGES -->
+    <div style="position: relative; z-index: 1051;">
+        <nav class="navbar navbar-expand-lg navbar-public">
+            <div class="container-xl">
+                <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.landing') }}">
+                    <img src="{{ url_for('static', filename='images/Mule Mart Logo V10 (Transparent, Text).svg') }}"
+                        alt="Mule Mart Logo">
+                </a>
 
-            <div class="d-flex align-items-center gap-2">
-                <a href="{{ url_for('auth.login') }}" class="btn colby-btn-outline fw-semibold">Sign In</a>
-                <a href="{{ url_for('auth.signup') }}" class="btn colby-btn-primary fw-semibold">Create Account</a>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{{ url_for('auth.login') }}" class="btn colby-btn-outline fw-semibold">Sign In</a>
+                    <a href="{{ url_for('auth.signup') }}" class="btn colby-btn-primary fw-semibold">Create Account</a>
+                </div>
             </div>
+        </nav>
+
+        <!-- FLASH MESSAGES -->
+        <div class="container-xl flash-overlay">
+            {% include "_flash_messages.html" %}
         </div>
-    </nav>
+    </div>
 
     <!-- MAIN CONTENT -->
     <main>
@@ -98,6 +105,8 @@
         &copy; 2026 Mule Mart
     </footer>
 
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
