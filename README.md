@@ -13,7 +13,7 @@
 👉 Live App: https://mulemart.com/  
 👉 Live Demo: [Watch here](https://drive.google.com/file/d/1hK4I7gq76e5CHXErsHI6UwAylSC5V6pP/view?usp=sharing)
 
-- A dedicated online marketplace for the Colby College community to buy, sell, and donate items.
+- A dedicated online marketplace for the Colby College community to buy, sell, and donate items, featuring AI-powered semantic search capabilities.
 - This project currently uses a Flask backend to handle user authentication, product listings, and other business logic, with a standard HTML, CSS, and JavaScript frontend.
 
 ## Table of Contents
