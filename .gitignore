@@ -18,7 +18,6 @@ env/
 # Database and instance files
 *.db
 instance/
-app/static/uploads
 
 # Byte-compiled / distribution files
 *.egg-info/
