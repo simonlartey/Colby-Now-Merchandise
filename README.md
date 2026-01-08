@@ -123,6 +123,7 @@ CI/CD workflow:
 ### Data & Infrastructure
 - **Database:** SQLite (Local), PostgreSQL (Production)
 - **Object Storage:** AWS S3 (via Boto3) for profile & item images
+- **Containerization:** Docker
 - **Deployment:** Heroku
 ### Search & AI
 - **Semantic Search:** SentenceTransformer, PyTorch, NumPy
@@ -136,6 +137,7 @@ CI/CD workflow:
 
 ```
 Mule-Mart/
+    ├── .dockerignore
     ├── .env.example
     ├── .github/
     │   ├── ISSUE_TEMPLATE/
@@ -147,6 +149,8 @@ Mule-Mart/
     │       └── run_tests.yml
     ├── .gitignore
     ├── .python-version
+    ├── Dockerfile
+    ├── LICENSE
     ├── Procfile
     ├── README.md
     ├── app/
@@ -175,6 +179,7 @@ Mule-Mart/
     │       ├── __init__.py
     │       ├── search_utils.py
     │       └── validators.py
+    ├── boot.sh
     ├── migrations/
     ├── requirements.txt
     ├── run.py
@@ -275,6 +280,31 @@ pytest
 To check code formatting:
 ```bash
 black .
+```
+
+## Running with Docker
+
+Alternatively, you can run the application using Docker.
+
+### 1. Build the Docker Image
+```bash
+docker build -t mule-mart .
+```
+
+### 2. Run the Container
+You need to pass the environment variables to the container. You can use the `.env` file you created.
+```bash
+docker run --name mule-mart -p 8000:8000 --env-file .env mule-mart
+```
+The application will be accessible at **http://localhost:8000**.
+
+### 3. Data Persistence (Optional)
+To persist the SQLite database and uploaded images, mount the `instance` and `app/static/images` directories:
+```bash
+docker run --name mule-mart -p 8000:8000 --env-file .env \
+    -v $(pwd)/instance:/app/instance \
+    -v $(pwd)/app/static/images:/app/app/static/images \
+    mule-mart
 ```
 
 ## Contributing
