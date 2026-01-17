@@ -84,7 +84,8 @@
 
                         <div>
                             <label for="condition" class="form-label fw-semibold">Condition</label>
-                            <select id="condition" name="condition" class="form-select form-select-lg">
+                            <select id="condition" name="condition" class="form-select form-select-lg" required>
+                                <option value="" disabled selected>Select...</option>
                                 <option>Brand New</option>
                                 <option>Like New</option>
                                 <option>Good</option>
@@ -105,6 +106,7 @@
                         <div>
                             <label for="size" class="form-label fw-semibold">Size</label>
                             <select id="size" name="size" required class="form-select form-select-lg">
+                                <option value="" disabled selected>Select...</option>
                                 <option>Large</option>
                                 <option>Medium</option>
                                 <option>Small</option>
@@ -114,7 +116,8 @@
 
                         <div>
                             <label for="category" class="form-label fw-semibold">Category</label>
-                            <select id="category" name="category" class="form-select form-select-lg">
+                            <select id="category" name="category" class="form-select form-select-lg" required>
+                                <option value="" disabled selected>Select...</option>
                                 <option value="books">Books</option>
                                 <option value="electronics">Electronics</option>
                                 <option value="clothing">Clothing</option>
@@ -125,7 +128,8 @@
 
                         <div>
                             <label for="seller-type" class="form-label fw-semibold">Seller type</label>
-                            <select id="seller-type" name="seller_type" class="form-select form-select-lg">
+                            <select id="seller-type" name="seller_type" class="form-select form-select-lg" required>
+                                <option value="" disabled selected>Select...</option>
                                 <option>Student</option>
                                 <option>Faculty</option>
                                 <option>Staff</option>
